@@ -612,6 +612,9 @@ body { background: radial-gradient(120% 50% at 50% -10%, color-mix(in srgb, var(
 .ph-head { display: flex; align-items: center; gap: 12px; }
 .avatar { flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #fff; font-family: var(--display); font-weight: 800; font-size: 1.2rem; letter-spacing: .02em; border: 2px solid color-mix(in srgb, var(--c) 60%, #fff); text-shadow: 0 1px 1px rgba(0,0,0,.5); }
 .hero-ball { display: block; margin-bottom: 10px; border-radius: 12px; }
+.posgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.posgrid .btn { display: grid; justify-items: center; gap: 0; padding: 10px 4px; }
+.posgrid .btn .small { font-size: .62rem; opacity: .85; }
 </style>
 <div id="app"></div>
 
@@ -1503,6 +1506,7 @@ function newGame(o) {
   const tl = tlSeason(Y0);
   for (const [idx] of tl) { const p = realPlayer(idx, Y0); p.t = -1; p.lst = "f"; G.fa.push(p.id); }
   syncReal(Y0, 1);
+  seedVeteranFAs(Y0);
   for (const t of G.teams) t.elo = 1500 + (teamOvr(t) - 74) * 18;
   // coach
   const ut = G.teams[o.team]; G.userTeam = ut.id;
@@ -2256,6 +2260,45 @@ function aiFASign(w) {
     }
   }
 }
+// outside the free-agency waves, free agents sign on the spot; asks drop as the season goes on
+// keep a real street free-agent market: unsigned veterans from last season, then camp-level bodies at every spot
+function ensureFAPool() {
+  const y = G.year, have = {}; for (const p of freeAgents()) have[p.pos] = (have[p.pos] || 0) + 1;
+  const want = { QB: 5, RB: 7, WR: 9, TE: 6, OL: 10, DL: 10, LB: 8, CB: 9, S: 7, K: 3, P: 3 };
+  for (const pos of POS) for (let n = have[pos] || 0; n < want[pos]; n++) { const p = genPlayer({ pos, ovr: R(52, 63), age: R(24, 30) }); p.t = -1; p.lst = "f"; p.con = null; if (!G.fa.includes(p.id)) G.fa.push(p.id); }
+}
+function seedVeteranFAs(y) {
+  if (y > LAST_REAL || !tlSeason(y - 1).size) return;
+  const now = tlSeason(y);
+  for (const [idx] of tlSeason(y - 1)) {
+    if (G.players[idx] || now.has(idx)) continue;
+    const age = PL[idx][2] ? y - PL[idx][2] : 30; if (age > 34) continue;
+    const r = realRating(idx, y - 1); if (!r || r < 58) continue;
+    const p = realPlayer(idx, y); p.ovr = clamp(r - (age >= 31 ? 2 : 0), 40, 90); calcAttrs(p); p.t = -1; p.lst = "f"; p.con = null; p.dv = 1; if (!G.fa.includes(p.id)) G.fa.push(p.id);
+  }
+}
+function faWaveOpen() { return G.phase === "off" && G.off && G.off.step === "fa" && G.faw && G.faw.wave < 3; }
+function faRosterMax() { return G.phase === "off" ? 75 : G.phase === "pre" ? 60 : ROSTER_MAX; }
+function faNowAsk(p) {
+  const key = G.year + ":" + G.phase + ":" + G.week + ":" + (G.off ? G.off.step : "");
+  if (p.askK === key && p.ask) return p.ask;
+  const a = askFor(p, G.year, false); let { apy, yrs, gt } = a;
+  if (G.phase === "reg" || G.phase === "post") { apy = Math.max(minSalary(G.year, expOf(p)), Math.round(apy * Math.max(0.45, 1 - G.week * 0.035) * 100) / 100); yrs = 1; gt = 0; }
+  else if (G.phase === "pre") { apy = Math.max(minSalary(G.year, expOf(p)), Math.round(apy * 0.8 * 100) / 100); yrs = Math.min(yrs, 2); gt = Math.round(gt * 0.5 * 10) / 10; }
+  p.ask = { apy, yrs, gt }; p.askK = key; p.tries = 0; p.counter = null; return p.ask;
+}
+function signFANow(id, offer) {
+  const p = P(id), u = userT(); if (!isGM()) return "The general manager handles signings.";
+  if (!p || p.t !== -1 || p.ret) return "He's already signed.";
+  if (faWaveOpen()) return faOffer(id, offer);
+  if (u.roster.length >= faRosterMax()) return G.phase === "off" ? "Your offseason roster is full." : "Your 53-man roster is full. Release someone first.";
+  if (G.year !== 2010 && offer.apy > capRoom(u) + 0.01) return "Not enough cap room.";
+  faNowAsk(p);
+  const r = negotiate(p, offer, false);
+  if (!r) { p.con = { apy: offer.apy, yrs: offer.yrs, gt: offer.gt, sy: G.year }; p.dv = 1; p.ask = null; p.counter = null; signTo(p, u, "a"); addNews(`The ${u.name} sign ${p.pos} ${playerName(p)}: ${offer.yrs} year${offer.yrs > 1 ? "s" : ""}, ${fmtM(offer.apy * offer.yrs)}.`); return null; }
+  if (r.walk) { p.walkK = p.askK; return `${playerName(p)}'s agent stops returning your calls for now.`; }
+  p.counter = r; return `Counter: ${r.yrs} year${r.yrs > 1 ? "s" : ""}, ${fmtM(r.apy)} a year, ${fmtM(r.gt)} guaranteed.`;
+}
 function faTargets() { return freeAgents().filter(p => p.t === -1).sort((a, b) => b.ovr - a.ovr); }
 function faOffer(id, offer) {
   const p = P(id); if (!p || p.t !== -1) return "He's already signed."; if (!G.faw) return "Free agency isn't open.";
@@ -2351,6 +2394,7 @@ function cutdownDay() {
     fillTeam(u, y, 1);
   }
   capComply();
+  ensureFAPool();
   // waiver wire: young players other teams cut
   G.waiver = freeAgents().filter(p => expOf(p, y) <= 4 && p.ovr >= 58).sort((a, b) => b.ovr - a.ovr).slice(0, 25).map(p => p.id);
 }
@@ -3632,6 +3676,7 @@ function render() {
 }
 function sheet(title, inner) { return `<div class="scrim" data-a="close"></div><section class="sheet" role="dialog" aria-label="${esc(title)}"><button class="sheet-x" data-a="close" aria-label="Close">✕</button>${inner}</section>`; }
 function cmpRow(label, a, b) { const d = Math.round(a - b); return `<div class="cmp"><span class="num ${d > 0 ? "up" : ""}">${Math.round(a)}</span><span class="dim small grow c">${label}</span><span class="num ${d < 0 ? "up" : ""}">${Math.round(b)}</span></div>`; }
+function posOK(key, p) { const v = UI[key] || "All"; return v === "All" || (p && p.pos === v); }
 function statY() { return G.statYear || G.year; }
 function unread() { return (G.inbox || []).filter(m => !m.read).length; }
 function newsList(n) { return (G.news || []).slice(0, n).map(x => `<div class="news ${x.k === "big" ? "upset" : ""}"><span class="dim small">${x.y}${x.w ? " · W" + x.w : ""}</span> ${esc(x.s)}</div>`).join(""); }
@@ -3767,16 +3812,17 @@ function staffCard() {
 }
 function resignPanel() {
   const u = userT(); if (!isGM()) return `<section class="card"><p class="small">Your general manager handles contracts. Real moves around the league happen when free agency opens.</p></section>`;
-  const ex = expiring(u).sort((a, b) => b.ovr - a.ovr), opts = allIds(u).map(P).filter(optionEligible);
-  return `<section class="card accent"><div class="eyebrow">Contracts ending · ${ex.length}</div><p class="small">Anyone you don't re-sign or tag hits free agency. Cap room: <b>${G.year === 2010 ? "uncapped" : fmtM(capRoom(u))}</b>${G.tagUsed ? " · tag used" : " · franchise tag available"}.</p>
+  const exAll = expiring(u).sort((a, b) => b.ovr - a.ovr), ex = exAll.filter(p => posOK("rsPos", p)), opts = allIds(u).map(P).filter(optionEligible);
+  return `<section class="card accent"><div class="eyebrow">Contracts ending · ${exAll.length}</div><p class="small">Anyone you don't re-sign or tag hits free agency. Cap room: <b>${G.year === 2010 ? "uncapped" : fmtM(capRoom(u))}</b>${G.tagUsed ? " · tag used" : " · franchise tag available"}.</p>
     <div class="row gap wrap"><button class="btn sm" data-a="autoresign">Auto re-sign the best</button></div>
-    ${ex.map(p => { const a = p.ask || (p.ask = askFor(p, G.year, true)); return `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)} · asks ${a.yrs} yrs, ${fmtM(a.apy)}/yr, ${fmtM(a.gt)} gtd</span>${p.counter ? `<br><span class="small warn">Counter: ${p.counter.yrs} yrs, ${fmtM(p.counter.apy)}, ${fmtM(p.counter.gt)} gtd</span>` : ""}</span>${ovrPill(p.ovr)}<button class="btn sm" data-a="negopen" data-v="${p.id}">Offer</button>${!G.tagUsed ? `<button class="btn sm" data-a="tag" data-v="${p.id}" title="${fmtM(tagValue(p))}">Tag</button>` : ""}</div>`; }).join("") || `<p class="dim small">Nobody's contract is up.</p>`}</section>
+    <div class="mt">${chipsPos("rsPos")}</div>
+    ${ex.map(p => { const a = p.ask || (p.ask = askFor(p, G.year, true)); return `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)} · asks ${a.yrs} yrs, ${fmtM(a.apy)}/yr, ${fmtM(a.gt)} gtd</span>${p.counter ? `<br><span class="small warn">Counter: ${p.counter.yrs} yrs, ${fmtM(p.counter.apy)}, ${fmtM(p.counter.gt)} gtd</span>` : ""}</span>${ovrPill(p.ovr)}<button class="btn sm" data-a="negopen" data-v="${p.id}">Offer</button>${!G.tagUsed ? `<button class="btn sm" data-a="tag" data-v="${p.id}" title="${fmtM(tagValue(p))}">Tag</button>` : ""}</div>`; }).join("") || (exAll.length ? `<p class="dim small">Nobody at this position.</p>` : `<p class="dim small">Nobody's contract is up.</p>`)}</section>
   ${opts.length ? `<section class="card"><div class="eyebrow">Fifth-year options</div>${opts.map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">option year ${fmtM(optionValue(p))}</span></span>${ovrPill(p.ovr)}<button class="btn sm pri" data-a="option" data-v="${p.id}">Pick up</button></div>`).join("")}</section>` : ""}`;
 }
 function negForm(p, kind) {
-  const a = p.counter || p.ask || askFor(p, G.year, kind !== "fa");
+  const a = kind === "now" ? (p.counter || faNowAsk(p)) : (p.counter || p.ask || askFor(p, G.year, kind !== "fa"));
   return `<div class="offer-form mt"><label>Years<input class="inp" id="ofY" type="number" min="1" max="6" value="${a.yrs}"></label><label>Per year ($M)<input class="inp" id="ofA" type="number" step="0.1" min="0.3" value="${a.apy}"></label><label>Guaranteed ($M)<input class="inp" id="ofG" type="number" step="0.5" min="0" value="${a.gt}"></label></div>
-  <button class="btn pri wide mt" data-a="${kind === "fa" ? "faoffer" : kind === "ext" ? "extoffer" : "resignoffer"}" data-v="${p.id}">Make the offer</button>`;
+  <button class="btn pri wide mt" data-a="${kind === "now" ? "fanow" : kind === "fa" ? "faoffer" : kind === "ext" ? "extoffer" : "resignoffer"}" data-v="${p.id}">Make the offer</button>`;
 }
 function faPanel() {
   const w = G.faw ? G.faw.wave : 0;
@@ -3808,33 +3854,35 @@ function draftRoom() {
   const recent = d.log.slice(-8).reverse();
   const avail = availableProspects().sort((a, b) => a.med - b.med);
   const board = dc.board.map(prospect).filter(x => x && P(x.id).t === -3);
-  const show = (UI.drView || "board") === "board" && board.length ? board : avail;
+  const show = ((UI.drView || "board") === "board" && board.length ? board : avail).filter(x => posOK("drPos", P(x.id)));
   return `<section class="card ${mine ? "accent" : ""}"><div class="eyebrow">${d.done ? "Draft complete" : `Round ${slot.rd}, pick ${slot.pk}`}</div>
     ${d.done ? `<p class="small">Your class: ${G.draftLog.filter(x => x.y === d.y && x.t === G.userTeam).map(x => `${esc(x.pos)} ${esc(x.n)}`).join(", ") || "none"}.</p>` : `<div class="dr-clock">${chip(T(slot.own))}<b>${esc(T(slot.own).name)} ${mine ? "· you're on the clock" : "are on the clock"}</b>${slot.orig !== slot.own ? `<span class="dim small">from ${esc(T(slot.orig).abbr)}</span>` : ""}</div>
     <div class="row gap wrap mt">${mine ? `<button class="btn sm" data-a="draftauto">Auto-pick</button>` : `<button class="btn sm pri" data-a="draftsim">Sim to my pick</button>`}<button class="btn sm" data-a="draftend">Sim to the end</button><button class="btn sm" data-a="drtrade">Trade picks</button></div>`}
     ${(d.calls || []).map((c, i) => `<div class="read mt small"><b>Trade call:</b> ${esc(c.why)} They offer pick${c.give.length > 1 ? "s" : ""} ${c.give.join(", ")} for pick ${c.get.join(", ")}. <button class="btn sm pri" data-a="acceptcall" data-v="${i}">Accept</button> <button class="btn sm" data-a="declinecall">Decline</button></div>`).join("")}</section>
   <section class="card"><div class="eyebrow">Recent picks</div>${recent.map(([pk, rd, t, id]) => `<div class="li"><span class="num">${pk}</span>${chip(T(t))}<span class="grow">${pname(P(id))} <span class="dim small">${P(id).pos} · ${esc(P(id).col)}</span></span></div>`).join("") || `<p class="dim small">No picks yet.</p>`}</section>
-  ${d.done ? "" : `<section class="card flush"><div class="pad">${seg("drView", [["board", "Your board"], ["best", "Best available"]])}</div>${show.slice(0, 40).map(x => { const p = P(x.id), v = scoutView(x); return `<div class="li"><span class="num">${x.med}</span><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">${esc(p.col)} · ${G.dc.tags[x.id] ? esc(G.dc.tags[x.id]) + " · " : ""}<span class="rng">${v.lo}-${v.hi}</span></span></span>${mine ? `<button class="btn sm pri" data-a="draftpick" data-v="${x.id}">Pick</button>` : ""}</div>`; }).join("")}</section>`}`;
+  ${d.done ? "" : `<section class="card flush"><div class="pad stack">${seg("drView", [["board", "Your board"], ["best", "Best available"]])}${chipsPos("drPos")}</div>${show.slice(0, 40).map(x => { const p = P(x.id), v = scoutView(x); return `<div class="li"><span class="num">${x.med}</span><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">${esc(p.col)} · ${G.dc.tags[x.id] ? esc(G.dc.tags[x.id]) + " · " : ""}<span class="rng">${v.lo}-${v.hi}</span></span></span>${mine ? `<button class="btn sm pri" data-a="draftpick" data-v="${x.id}">Pick</button>` : ""}</div>`; }).join("") || `<p class="pad dim small">Nobody left at this position.</p>`}</section>`}`;
 }
 function udfaPanel() {
   if (!G.udfa) return "";
-  const list = G.udfa.list.map(P).filter(p => p.t === -3);
+  const list = G.udfa.list.map(P).filter(p => p.t === -3 && posOK("udPos", p));
   return `<section class="card accent"><div class="eyebrow">Undrafted free agents</div><p class="small">Offer a signing bonus (in thousands) to up to 15 players. Real teams go after the ones they really signed.</p>
-    ${list.slice(0, 40).map(p => { const x = prospect(p.id); const v = x ? scoutView(x) : { lo: p.ovr, hi: p.ovr }; const o = G.udfa.offers[p.id]; return `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">${esc(p.col)} · <span class="rng">${v.lo}-${v.hi}</span></span></span>${o ? `<span class="tag good">$${o}K</span>` : ""}<button class="btn sm" data-a="udfa" data-v="${p.id}" data-k="${o ? 0 : 15}">${o ? "Cancel" : "$15K"}</button><button class="btn sm" data-a="udfa" data-v="${p.id}" data-k="40">$40K</button></div>`; }).join("")}</section>`;
+    ${chipsPos("udPos")}
+    ${list.slice(0, 40).map(p => { const x = prospect(p.id); const v = x ? scoutView(x) : { lo: p.ovr, hi: p.ovr }; const o = G.udfa.offers[p.id]; return `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">${esc(p.col)} · <span class="rng">${v.lo}-${v.hi}</span></span></span>${o ? `<span class="tag good">$${o}K</span>` : ""}<button class="btn sm" data-a="udfa" data-v="${p.id}" data-k="${o ? 0 : 15}">${o ? "Cancel" : "$15K"}</button><button class="btn sm" data-a="udfa" data-v="${p.id}" data-k="40">$40K</button></div>`; }).join("") || `<p class="dim small">Nobody left at this position.</p>`}</section>`;
 }
 function campPanel() {
   const u = userT(), c = G.camp || { left: 0, focus: [] };
-  const young = allIds(u).map(P).filter(p => ageOf(p) <= 27).sort((a, b) => (b.pot - b.ovr) - (a.pot - a.ovr));
+  const young = allIds(u).map(P).filter(p => ageOf(p) <= 27 && posOK("cpPos", p)).sort((a, b) => (b.pot - b.ovr) - (a.pot - a.ovr));
   return `<section class="card accent"><div class="eyebrow">Training camp</div><p class="small">Pick up to ${c.left + c.focus.length} focus players. They get extra coaching in OTAs, minicamp and camp. ${c.left} spot${c.left === 1 ? "" : "s"} left.</p>
     ${c.focus.map(id => `<span class="tag good">${esc(playerName(P(id)))}</span>`).join(" ")}
-    ${young.slice(0, 25).map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)}${p.rookie === G.year ? " · rookie" : ""}</span></span>${ovrPill(p.ovr)}<button class="btn sm" data-a="campfocus" data-v="${p.id}" ${c.focus.includes(p.id) || !c.left ? "disabled" : ""}>Focus</button></div>`).join("")}</section>`;
+    ${chipsPos("cpPos")}
+    ${young.slice(0, 30).map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)}${p.rookie === G.year ? " · rookie" : ""}</span></span>${ovrPill(p.ovr)}<button class="btn sm" data-a="campfocus" data-v="${p.id}" ${c.focus.includes(p.id) || !c.left ? "disabled" : ""}>Focus</button></div>`).join("")}</section>`;
 }
 
 // ===== Team tab: roster, depth, cap, strategy, trades, staff, stats =====
-const TEAM_SUBS = [["roster", "Roster"], ["depth", "Depth"], ["cap", "Cap"], ["strategy", "Strategy"], ["trades", "Trades"], ["staff", "Staff"], ["stats", "Stats"]];
+const TEAM_SUBS = [["roster", "Roster"], ["fa", "Free agents"], ["depth", "Depth"], ["cap", "Cap"], ["strategy", "Strategy"], ["trades", "Trades"], ["staff", "Staff"], ["stats", "Stats"]];
 function renderTeam() {
   const sub = TEAM_SUBS.some(s => s[0] === UI.teamSub) ? UI.teamSub : "roster";
-  const body = sub === "roster" ? rosterView() : sub === "depth" ? depthView() : sub === "cap" ? capView() : sub === "strategy" ? strategyView() : sub === "trades" ? tradesView() : sub === "staff" ? staffView() : renderTeamStats(userT());
+  const body = sub === "roster" ? rosterView() : sub === "fa" ? faView() : sub === "depth" ? depthView() : sub === "cap" ? capView() : sub === "strategy" ? strategyView() : sub === "trades" ? tradesView() : sub === "staff" ? staffView() : renderTeamStats(userT());
   return `<div class="stack">${chips("teamSub", TEAM_SUBS)}${body}</div>`;
 }
 function gmNote() { return isGM() ? "" : `<p class="dim small">The general manager makes roster moves. You coach the players you're given.</p>`; }
@@ -3853,7 +3901,22 @@ function rosterView() {
   <section class="card flush"><div class="pad eyebrow">Practice squad</div>${ps.map(p => playerRow(p, "practice squad")).join("") || `<p class="pad dim small">Empty.</p>`}</section>
   ${ir.length ? `<section class="card flush"><div class="pad eyebrow">Injured reserve</div>${ir.map(p => playerRow(p, p.inj >= 99 ? "out for the season" : p.inj ? p.inj + " wk" : "")).join("")}</section>` : ""}
   ${isGM() && wv.length && (G.phase === "pre" || (G.phase === "reg" && G.week <= 3)) ? `<section class="card flush"><div class="pad eyebrow">Waiver wire</div><p class="pad dim small">Claims go in reverse order of last season's record.</p>${wv.slice(0, 20).map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)}</span></span>${ovrPill(p.ovr)}<button class="btn sm" data-a="claim" data-v="${p.id}">Claim</button></div>`).join("")}</section>` : ""}
-  ${isGM() && G.phase !== "off" ? `<section class="card flush"><div class="pad row between"><span class="eyebrow">Free agents</span><button class="link small" data-a="set" data-k="faShow" data-v="${UI.faShow ? 0 : 1}">${UI.faShow ? "Hide" : "Show"}</button></div>${UI.faShow ? freeAgents().filter(f).sort((a, b) => b.ovr - a.ovr).slice(0, 25).map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)} · min ${fmtM(minSalary(G.year, expOf(p)))}</span></span>${ovrPill(p.ovr)}<button class="btn sm" data-a="signfa" data-v="${p.id}">Sign</button></div>`).join("") : ""}</section>` : ""}`;
+  ${isGM() ? `<button class="btn wide" data-a="set" data-k="teamSub" data-v="fa">Browse free agents</button>` : ""}`;
+}
+// free agents, all year
+function faView() {
+  const pos = UI.faPos || "All", u = userT(), wave = faWaveOpen();
+  const sort = UI.faSort || "ovr";
+  let list = faTargets().filter(p => !p.ret && (pos === "All" || p.pos === pos));
+  if (sort === "young") list = list.filter(p => ageOf(p) <= 26);
+  if (sort === "cheap") list = list.slice().sort((a, b) => (wave ? (a.ask || askFor(a, G.year)).apy : faNowAsk(a).apy) - (wave ? (b.ask || askFor(b, G.year)).apy : faNowAsk(b).apy) || b.ovr - a.ovr);
+  const lim = UI.faLim || 40;
+  const note = !isGM() ? "The general manager makes signings. You can look." : wave ? `Free agency wave ${G.faw.wave + 1} of 3: offers are decided when the wave ends, and real teams bid too.` : G.phase === "reg" || G.phase === "post" ? `In-season free agents sign one-year deals on the spot, and their asks drop as the weeks go by. Your roster: ${u.roster.length}/53.` : G.phase === "pre" ? `Camp bodies and veterans looking for a job sign on the spot. Roster ${u.roster.length} (cut to 53 on cut-down day).` : `Free agents sign on the spot right now. The big market opens with free agency.`;
+  return `<section class="card"><div class="eyebrow">Free agents · ${faTargets().length} available</div><p class="small">${note}</p>${isGM() ? `<p class="small">Cap room <b>${G.year === 2010 ? "uncapped" : fmtM(capRoom(u))}</b>${(G.faw && G.faw.offers && Object.keys(G.faw.offers).length && wave) ? ` · ${Object.keys(G.faw.offers).length} offer${Object.keys(G.faw.offers).length > 1 ? "s" : ""} out` : ""}</p>` : ""}</section>
+  ${chipsPos("faPos")}
+  <div class="seg">${[["ovr", "Best"], ["young", "26 and under"], ["cheap", "Cheapest"]].map(([k, l]) => `<button class="${sort === k ? "on" : ""}" data-a="set" data-k="faSort" data-v="${k}">${l}</button>`).join("")}</div>
+  <section class="card flush">${list.slice(0, lim).map(p => { const a = wave ? (p.ask || askFor(p, G.year)) : faNowAsk(p); const off = wave && G.faw.offers[p.id]; return `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} ${injTag(p)}<br><span class="dim small">age ${ageOf(p)} · asks ${a.yrs} yr${a.yrs > 1 ? "s" : ""}, ${fmtM(a.apy)}${p.fromUser ? " · was yours" : ""}${off ? ` · <b>offered ${fmtM(off.apy)}</b>` : ""}</span></span>${ovrPill(p.ovr)}${isGM() ? `<button class="btn sm ${off ? "" : "pri"}" data-a="negopen" data-v="${p.id}">${off ? "Change" : wave ? "Offer" : "Sign"}</button>` : ""}</div>`; }).join("") || `<p class="pad dim small">Nobody available at this spot.</p>`}</section>
+  ${list.length > lim ? `<button class="btn wide" data-a="set" data-k="faLim" data-v="${lim + 40}">Show more</button>` : ""}`;
 }
 function depthView() {
   const u = userT(), pos = UI.depthPos || "QB";
@@ -3874,7 +3937,7 @@ function capView() {
     ${G.year === 2010 ? `<p class="small">2010 was the uncapped year: no cap, no floor.</p>` : `<div class="kv"><div><span class="dim small">Cap</span><span class="num">${fmtM(cap)}</span></div><div><span class="dim small">Payroll</span><span class="num">${fmtM(pay)}</span></div><div><span class="dim small">Room</span><span class="num ${cap - pay < 0 ? "bad" : ""}">${fmtM(cap - pay)}</span></div></div>`}
     <div class="capbar"><i style="width:${clamp(pay / cap * 100, 0, 100)}%"></i></div></section>
   <section class="card"><div class="eyebrow">Spending by position</div>${POS.map(p => `<div class="cmp"><span class="pos">${p}</span><span class="grow">${bar(byPos[p] || 0, Math.max(...Object.values(byPos), 1))}</span><span class="num small">${fmtM(byPos[p] || 0)}</span></div>`).join("")}</section>
-  <section class="card flush"><div class="pad eyebrow">Contracts</div>${list.map(p => `<button class="li" data-a="player" data-v="${p.id}"><span class="pos">${p.pos}</span><span class="grow"><b>${esc(playerName(p))}</b> ${injTag(p)}<br><span class="dim small">${esc(conLine(p))}${p.con.gt ? " · " + fmtM(p.con.gt) + " gtd" : ""}</span></span><span class="num">${fmtM(p.con.apy)}</span></button>`).join("")}</section>
+  <section class="card flush"><div class="pad"><div class="eyebrow">Contracts</div>${chipsPos("capPos")}</div>${list.filter(p => posOK("capPos", p)).map(p => `<button class="li" data-a="player" data-v="${p.id}"><span class="pos">${p.pos}</span><span class="grow"><b>${esc(playerName(p))}</b> ${injTag(p)}<br><span class="dim small">${esc(conLine(p))}${p.con.gt ? " · " + fmtM(p.con.gt) + " gtd" : ""}</span></span><span class="num">${fmtM(p.con.apy)}</span></button>`).join("")}</section>
   ${next.length ? `<section class="card"><div class="eyebrow">Up after this season · ${next.length}</div><p class="small">${next.slice(0, 12).map(p => esc(playerName(p))).join(", ")}${next.length > 12 ? "…" : ""}</p>${isGM() ? `<p class="dim small">Extend a player from his card to keep him off the market.</p>` : ""}</section>` : ""}`;
 }
 function strategyView() {
@@ -3914,13 +3977,16 @@ function tradesView() {
   if (!open) builder = `<section class="card"><p class="small">The trade deadline (week ${dl}) has passed. Trades open again after the season.</p></section>`;
   else {
     const partner = tr.tid != null ? T(tr.tid) : null;
-    const side = (tid, s, who) => {
+    const posName = tr.pos && tr.pos !== "ANY" ? tr.pos : null;
+    const side = (tid, s, who, focus) => {
       const t = T(tid), picks = tradablePicks(tid);
-      const plist = t.roster.map(P).sort((a, b) => b.ovr - a.ovr);
+      let plist = t.roster.map(P).sort((a, b) => b.ovr - a.ovr);
+      const filt = focus && posName && !UI.trAll;
+      if (filt) plist = plist.filter(p => p.pos === posName);
       const selP = s.players, selK = s.picks.map(pickKey);
       return `<div class="eyebrow mt">${who}</div>
       <div class="chips">${picks.map(pk => `<button class="${selK.includes(pickKey(pk)) ? "on" : ""}" data-a="trpick" data-k="${who === "You give" ? "give" : "get"}" data-v="${esc(pickKey(pk))}">${esc(pickTxt(pk))}</button>`).join("") || `<span class="dim small">No picks to deal</span>`}</div>
-      <div class="trlist">${plist.slice(0, UI.trAll ? 53 : 22).map(p => `<button class="li ${selP.includes(p.id) ? "sel" : ""}" data-a="trp" data-k="${who === "You give" ? "give" : "get"}" data-v="${p.id}"><span class="pos">${p.pos}</span><span class="grow">${esc(playerName(p))} <span class="dim small">age ${ageOf(p)} · ${p.con ? fmtM(p.con.apy) + " × " + Math.max(0, p.con.yrs) : ""}</span></span>${ovrPill(p.ovr)}</button>`).join("")}</div>`;
+      <div class="trlist">${plist.slice(0, filt || UI.trAll ? 60 : 22).map(p => `<button class="li ${selP.includes(p.id) ? "sel" : ""}" data-a="trp" data-k="${who === "You give" ? "give" : "get"}" data-v="${p.id}"><span class="pos">${p.pos}</span><span class="grow">${esc(playerName(p))} <span class="dim small">age ${ageOf(p)} · ${p.con ? fmtM(p.con.apy) + " × " + Math.max(0, p.con.yrs) : ""}</span></span>${ovrPill(p.ovr)}</button>`).join("") || `<p class="pad dim small">Nobody at ${esc(posName || "")}.</p>`}</div>`;
     };
     let verdict = "";
     if (partner && (tr.give.players.length + tr.give.picks.length) && (tr.get.players.length + tr.get.picks.length)) {
@@ -3928,9 +3994,22 @@ function tradesView() {
       const pctv = e.vout ? Math.round(e.vin / e.vout * 100) : 0;
       verdict = `<div class="read small mt">${e.ok ? `<b class="up">They'd take this.</b>` : `<b>${esc(e.why)}</b>`}${e.vout ? ` Value to them: ${pctv}% of what they give up.` : ""}</div><button class="btn pri wide mt" data-a="trgo" ${e.ok ? "" : "disabled"}>Make the trade</button>`;
     }
-    builder = `<section class="card"><div class="eyebrow">Trade builder · deadline week ${dl}</div>
-      <label class="small">Trade with<select class="inp" data-ch="trteam"><option value="">Pick a team</option>${G.teams.filter(t => t.id !== u.id).sort((a, b) => a.name.localeCompare(b.name)).map(t => `<option value="${t.id}" ${tr.tid === t.id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>
-      ${partner ? `<p class="small mt">Their needs: ${Object.entries(posNeeds(partner)).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join(", ")}</p>${side(u.id, tr.give, "You give")}${side(partner.id, tr.get, "You get")}<button class="link small" data-a="set" data-k="trAll" data-v="${UI.trAll ? 0 : 1}">${UI.trAll ? "Show fewer players" : "Show the whole roster"}</button>${verdict}<button class="link small" data-a="trclear">Clear</button>` : ""}</section>`;
+    if (!tr.pos) {
+      // step 1: what are you shopping for?
+      const nd = posNeeds(u);
+      builder = `<section class="card"><div class="eyebrow">Trade builder · step 1 of 2 · deadline week ${dl}</div><p class="small">What position are you looking for?</p>
+        <div class="posgrid">${POS.map(p => `<button class="btn ${(nd[p] || 0) >= 3 ? "pri" : ""}" data-a="trpos" data-v="${p}">${p}${(nd[p] || 0) >= 3 ? `<span class="small">need</span>` : ""}</button>`).join("")}<button class="btn" data-a="trpos" data-v="ANY">Any</button></div>
+        ${tr.give.players.length ? `<p class="small mt">Shopping: ${tr.give.players.map(id => esc(playerName(P(id)))).join(", ")}</p>` : ""}</section>`;
+    } else if (!partner) {
+      // step 2: which team? Best fits first
+      const rows = G.teams.filter(t => t.id !== u.id).map(t => { const best = posName ? t.roster.map(P).filter(p => p.pos === posName).sort((a, b) => b.ovr - a.ovr).slice(0, 2) : []; return { t, best, key: posName ? (best[0] ? best[0].ovr : 0) : teamOvr(t) }; }).sort((a, b) => b.key - a.key);
+      builder = `<section class="card flush"><div class="pad"><div class="eyebrow">Trade builder · step 2 of 2</div><p class="small">${posName ? `Teams with the best ${posName}s. Pick a team to talk to.` : "Pick a team to talk to."} <button class="link small" data-a="trposback">Change position</button></p></div>
+        ${rows.map(({ t, best }) => `<button class="li" data-a="trteamv" data-v="${t.id}">${chip(t)}<span class="grow"><b>${esc(t.name)}</b> <span class="dim small">${recStr(t)}</span>${best.length ? `<br><span class="small dim">${best.map(p => `${esc(playerName(p))} ${p.ovr}`).join(" · ")}</span>` : ""}</span><span class="dim">›</span></button>`).join("")}</section>`;
+    } else {
+      builder = `<section class="card"><div class="eyebrow">Trade builder · deadline week ${dl}</div>
+        <div class="row between wrap gap"><span class="row gap">${chip(partner)}<b>${esc(partner.name)}</b></span><span class="small"><button class="link small" data-a="trposback">${posName ? esc(posName) : "Any position"}</button> · <button class="link small" data-a="trteamback">Change team</button></span></div>
+        <p class="small mt">Their needs: ${Object.entries(posNeeds(partner)).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join(", ")}</p>${side(partner.id, tr.get, "You get", true)}${side(u.id, tr.give, "You give", false)}<button class="link small" data-a="set" data-k="trAll" data-v="${UI.trAll ? 0 : 1}">${UI.trAll ? (posName ? `Only ${posName}s` : "Show fewer players") : posName ? "Show every position" : "Show the whole roster"}</button>${verdict}<button class="link small" data-a="trclear">Start over</button></section>`;
+    }
   }
   return `${offers.length ? `<section class="card accent"><div class="eyebrow">Offers for your players</div>${offers.map((o, i) => { const p = P(o.want); return `<div class="li"><span class="grow small"><b>${esc(T(o.tid).name)}</b> want ${p.pos} ${esc(playerName(p))}<br><span class="dim">for ${o.picks.map(pickTxt).join(", ")}</span></span><button class="btn sm pri" data-a="offeryes" data-v="${(G.offersIn || []).indexOf(o)}">Accept</button><button class="btn sm" data-a="offerno" data-v="${(G.offersIn || []).indexOf(o)}">No</button></div>`; }).join("")}</section>` : ""}${builder}`;
 }
@@ -3968,13 +4047,14 @@ const STAT_CATS = {
 const fmtN = n => Math.round(n).toLocaleString();
 function renderTeamStats(t) {
   const car = UI.statC === "career", cat = STAT_CATS[UI.statCat] ? UI.statCat : "pass", C = STAT_CATS[cat];
-  const rows = allIds(t).map(P).filter(Boolean).map(p => [p, car ? careerOf(p) : (p.s || {})]).filter(([, s]) => C.has(s));
+  const rows = allIds(t).map(P).filter(p => p && posOK("stPos", p)).map(p => [p, car ? careerOf(p) : (p.s || {})]).filter(([, s]) => C.has(s));
   const sk = UI.statSort && C.cols.some(c => c[0] === UI.statSort) ? UI.statSort : C.cols[cat === "pass" ? 2 : cat === "def" ? 0 : 1][0];
   const val = (s, c) => c[2] ? parseFloat(c[2](s)) || 0 : (s[c[0]] || 0);
   const col = C.cols.find(c => c[0] === sk);
   rows.sort((a, b) => val(b[1], col) - val(a[1], col));
   return `<div class="seg">${[["season", `${statY()} season`], ["career", "Career"]].map(([k, l]) => `<button class="${(car ? "career" : "season") === k ? "on" : ""}" data-a="statc" data-v="${k}">${l}</button>`).join("")}</div>
   <div class="chips">${Object.entries(STAT_CATS).map(([k, c]) => `<button class="${cat === k ? "on" : ""}" data-a="statcat" data-v="${k}">${c.l}</button>`).join("")}</div>
+  ${chipsPos("stPos")}
   <div class="card flush tbl-wrap"><table class="tbl stat"><thead><tr><th>Player</th>${C.cols.map(c => `<th><button class="link th ${c[0] === sk ? "on" : ""}" data-a="statsort" data-v="${c[0]}">${c[1]}${c[0] === sk ? " ▾" : ""}</button></th>`).join("")}</tr></thead>
   <tbody>${rows.length ? rows.map(([p, s]) => `<tr><td><button class="link" data-a="player" data-v="${p.id}">${esc(p.f[0] + ". " + p.l)}</button> <span class="dim small">${p.pos}</span></td>${C.cols.map(c => `<td class="num">${c[2] ? c[2](s) : fmtN(s[c[0]] || 0)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${C.cols.length + 1}" class="dim">No ${C.l.toLowerCase()} stats yet.</td></tr>`}</tbody></table></div>
   ${car ? `<p class="dim small">Career totals include real NFL stats before the save started, regular season only.</p>` : `<section class="card"><p class="small">Points: ${t.pf} for, ${t.pa} against · ${recStr(t)}</p></section>`}`;
@@ -4011,10 +4091,11 @@ function bigBoard() {
   ${list.length > lim ? `<button class="btn wide" data-a="set" data-k="bbLim" data-v="${lim + 60}">Show more</button>` : ""}`;
 }
 function myBoard() {
-  const b = G.dc.board.map(prospect).filter(Boolean);
-  return `<p class="small">${b.length} on your board. Drag the handle, or use the arrows, to rank them. ${isGM() ? "Auto-picks follow this order." : "The GM sees your order as advice."}</p>
-  <section class="card flush" id="myboard">${b.map((x, i) => { const p = P(x.id), v = scoutView(x), tag = G.dc.tags[x.id]; return `<div class="li brow ${p.t !== -3 ? "gone" : ""}" data-drag="${x.id}"><span class="drag-h" aria-label="Drag to reorder">⠿</span><span class="num">${i + 1}</span><span class="pos">${p.pos}</span><button class="link grow tl" data-a="prospect" data-v="${x.id}"><b>${esc(playerName(p))}</b>${tag ? ` <span class="tag ${tag === "avoid" ? "bad" : "good"}">${esc(TAGS.find(t => t[0] === tag)[1])}</span>` : ""}<br><span class="dim small">${esc(p.col)} · media #${x.med}</span></button><span class="rng">${v.known ? Math.round((v.lo + v.hi) / 2) : v.lo + "–" + v.hi}</span><span class="gdbtns"><button class="btn sm" data-a="bmove" data-v="${i}" data-k="-1" ${i ? "" : "disabled"} aria-label="Move up">▲</button><button class="btn sm" data-a="bmove" data-v="${i}" data-k="1" ${i < b.length - 1 ? "" : "disabled"} aria-label="Move down">▼</button></span></div>`; }).join("") || `<p class="pad dim small">Add prospects from the big board or a prospect's card.</p>`}</section>
-  ${b.length ? `<button class="link small" data-a="bclear">Clear the board</button>` : ""}`;
+  const all = G.dc.board.map(prospect).filter(Boolean), b = all.filter(x => posOK("mbPos", P(x.id)));
+  return `<p class="small">${all.length} on your board. Drag the handle, or use the arrows, to rank them. ${isGM() ? "Auto-picks follow this order." : "The GM sees your order as advice."}</p>
+  ${chipsPos("mbPos")}
+  <section class="card flush" id="myboard">${b.map((x, i) => { const p = P(x.id), v = scoutView(x), tag = G.dc.tags[x.id]; return `<div class="li brow ${p.t !== -3 ? "gone" : ""}" data-drag="${x.id}"><span class="drag-h" aria-label="Drag to reorder">⠿</span><span class="num">${all.indexOf(x) + 1}</span><span class="pos">${p.pos}</span><button class="link grow tl" data-a="prospect" data-v="${x.id}"><b>${esc(playerName(p))}</b>${tag ? ` <span class="tag ${tag === "avoid" ? "bad" : "good"}">${esc(TAGS.find(t => t[0] === tag)[1])}</span>` : ""}<br><span class="dim small">${esc(p.col)} · media #${x.med}</span></button><span class="rng">${v.known ? Math.round((v.lo + v.hi) / 2) : v.lo + "–" + v.hi}</span><span class="gdbtns"><button class="btn sm" data-a="bmove" data-v="${x.id}" data-k="-1" ${i ? "" : "disabled"} aria-label="Move up">▲</button><button class="btn sm" data-a="bmove" data-v="${x.id}" data-k="1" ${i < b.length - 1 ? "" : "disabled"} aria-label="Move down">▼</button></span></div>`; }).join("") || (all.length ? `<p class="pad dim small">Nobody at this position on your board.</p>` : `<p class="pad dim small">Add prospects from the big board or a prospect's card.</p>`)}</section>
+  ${all.length ? `<button class="link small" data-a="bclear">Clear the board</button>` : ""}`;
 }
 function eventsView() {
   const dc = G.dc, ev = dc.ev;
@@ -4033,8 +4114,8 @@ function eventsView() {
   ${ev.combine && !preDraft ? `<p class="dim small">Pro days and visits are done for this class.</p>` : ""}`;
 }
 function combineTop() {
-  const xs = G.dc.list.filter(x => x.cmb).map(x => [x, combineFor(x)]).filter(([, c]) => c.forty).sort((a, b) => a[1].forty - b[1].forty).slice(0, 8);
-  return xs.map(([x, c]) => { const p = P(x.id); return `<button class="li" data-a="prospect" data-v="${x.id}"><span class="pos">${p.pos}</span><span class="grow">${esc(playerName(p))} <span class="dim small">${esc(p.col)}</span></span><span class="num">${c.forty.toFixed(2)}</span></button>`; }).join("") + `<p class="dim small">Fastest 40-yard dashes.${xs.some(([, c]) => !c.real) ? " Some times are estimated where real results aren't on record." : ""}</p>`;
+  const xs = G.dc.list.filter(x => x.cmb && posOK("cmPos", P(x.id))).map(x => [x, combineFor(x)]).filter(([, c]) => c.forty).sort((a, b) => a[1].forty - b[1].forty).slice(0, 8);
+  return chipsPos("cmPos") + xs.map(([x, c]) => { const p = P(x.id); return `<button class="li" data-a="prospect" data-v="${x.id}"><span class="pos">${p.pos}</span><span class="grow">${esc(playerName(p))} <span class="dim small">${esc(p.col)}</span></span><span class="num">${c.forty.toFixed(2)}</span></button>`; }).join("") + `<p class="dim small">Fastest 40-yard dashes.${xs.some(([, c]) => !c.real) ? " Some times are estimated where real results aren't on record." : ""}</p>`;
 }
 function mocksView() {
   const m = G.dc.mocks || [];
@@ -4042,7 +4123,8 @@ function mocksView() {
   const i = clamp(UI.mockI || 0, 0, m.length - 1), cur = m[i], prev = m[i + 1];
   const prevPos = {}; if (prev) prev.picks.forEach(([pk, , id]) => prevPos[id] = pk);
   return `<div class="seg">${m.map((x, j) => `<button class="${j === i ? "on" : ""}" data-a="set" data-k="mockI" data-v="${j}">${x.ph === "reg" ? "Week " + x.w : x.ph === "off" ? "Offseason" : "Preseason"}</button>`).join("")}</div>
-  <section class="card flush">${cur.picks.map(([pk, tid, id]) => { const p = P(id), x = prospect(id); const was = prevPos[id]; const mv = was ? was - pk : null; return `<button class="li" data-a="prospect" data-v="${id}"><span class="num">${pk}</span>${chip(T(tid))}<span class="grow"><b>${esc(playerName(p))}</b> <span class="dim small">${p.pos} · ${esc(p.col)}</span></span>${mv ? `<span class="${mv > 0 ? "trend-up" : "trend-dn"}">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : was ? "" : prev ? `<span class="tag">New</span>` : ""}</button>`; }).join("")}</section>`;
+  ${chipsPos("mkPos")}
+  <section class="card flush">${cur.picks.filter(([, , id]) => posOK("mkPos", P(id))).map(([pk, tid, id]) => { const p = P(id), x = prospect(id); const was = prevPos[id]; const mv = was ? was - pk : null; return `<button class="li" data-a="prospect" data-v="${id}"><span class="num">${pk}</span>${chip(T(tid))}<span class="grow"><b>${esc(playerName(p))}</b> <span class="dim small">${p.pos} · ${esc(p.col)}</span></span>${mv ? `<span class="${mv > 0 ? "trend-up" : "trend-dn"}">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : was ? "" : prev ? `<span class="tag">New</span>` : ""}</button>`; }).join("")}</section>`;
 }
 function needsView() {
   const u = userT(), nd = posNeeds(u);
@@ -4246,7 +4328,8 @@ function draftsView() {
   const y = UI.drY && ys.includes(UI.drY) ? UI.drY : ys[0];
   return `<section class="card"><div class="eyebrow">Your picks</div>${G.draftLog.filter(x => x.t === G.userTeam).slice().reverse().map(x => { const p = P(x.pid); return `<button class="li" data-a="player" data-v="${x.pid}"><span class="num">${x.y}</span><span class="pos">${esc(x.pos)}</span><span class="grow small"><b>${esc(x.n)}</b> · round ${x.rd}, #${x.pk}<br><span class="dim">${p ? (p.ret ? "retired" : p.t >= 0 ? esc(T(p.t).abbr) : "free agent") : ""}</span></span>${p ? ovrPill(p.ovr) : ""}</button>`; }).join("") || `<p class="dim small">You haven't drafted yet.</p>`}</section>
   ${ys.length ? `<label class="small">Full draft<select class="inp" data-ch="drY">${ys.map(v => `<option value="${v}" ${v === y ? "selected" : ""}>${v}</option>`).join("")}</select></label>
-  <section class="card flush">${G.draftLog.filter(x => x.y === y).slice(0, UI.drAll ? 300 : 64).map(x => { const p = P(x.pid), real = p && p.realPick; return `<button class="li ${x.t === G.userTeam ? "me" : ""}" data-a="player" data-v="${x.pid}"><span class="num">${x.pk}</span>${chip(T(x.t))}<span class="grow small"><b>${esc(x.n)}</b> <span class="dim">${esc(x.pos)}${real && (real.pk !== x.pk || real.t !== x.t) ? ` · really #${real.pk} ${esc(T(real.t).abbr)}` : ""}</span></span></button>`; }).join("")}</section>
+  ${chipsPos("dhPos")}
+  <section class="card flush">${G.draftLog.filter(x => x.y === y && posOK("dhPos", x)).slice(0, UI.drAll || (UI.dhPos && UI.dhPos !== "All") ? 300 : 64).map(x => { const p = P(x.pid), real = p && p.realPick; return `<button class="li ${x.t === G.userTeam ? "me" : ""}" data-a="player" data-v="${x.pid}"><span class="num">${x.pk}</span>${chip(T(x.t))}<span class="grow small"><b>${esc(x.n)}</b> <span class="dim">${esc(x.pos)}${real && (real.pk !== x.pk || real.t !== x.t) ? ` · really #${real.pk} ${esc(T(real.t).abbr)}` : ""}</span></span></button>`; }).join("")}</section>
   <button class="link small" data-a="set" data-k="drAll" data-v="${UI.drAll ? 0 : 1}">${UI.drAll ? "First two rounds" : "All seven rounds"}</button>` : ""}`;
 }
 function vsView() {
@@ -4547,8 +4630,7 @@ function playerSheet(id) {
     ${canTrade() ? `<button class="btn sm" data-a="trshop" data-v="${p.id}">Shop in a trade</button>` : ""}
     ${nk ? `<button class="btn sm bad" data-a="release" data-v="${p.id}">Yes, release him</button><button class="btn sm" data-a="cutno">Keep</button>` : `<button class="btn sm" data-a="cutask" data-v="${p.id}">Release</button>`}</div>
     ${p.con && p.con.gt && nk ? `<p class="dim small">Guaranteed money still counts against your cap this year.</p>` : ""}` : ""}
-  ${isGM() && p.t === -1 && !p.ret && G.phase !== "off" ? `<div class="row gap mt"><button class="btn sm pri" data-a="signfa" data-v="${p.id}">Sign for ${fmtM(minSalary(G.year, expOf(p)))}</button></div>` : ""}
-  ${isGM() && p.t === -1 && G.phase === "off" && G.off.step === "fa" ? `<div class="eyebrow mt">Free agent offer</div>${negForm(p, "fa")}` : ""}
+  ${isGM() && p.t === -1 && !p.ret ? `<div class="eyebrow mt">${faWaveOpen() ? "Free agent offer · decided when the wave ends" : "Sign him"}</div><p class="small">He wants ${(a => `${a.yrs} yr${a.yrs > 1 ? "s" : ""}, ${fmtM(a.apy)} a year, ${fmtM(a.gt)} guaranteed`)(faWaveOpen() ? (p.ask || askFor(p, G.year)) : faNowAsk(p))}.</p>${negForm(p, faWaveOpen() ? "fa" : "now")}` : ""}
   ${real && !p.dv && G.year <= LAST_REAL ? `<p class="dim small mt">Following his real career.</p>` : real ? `<p class="dim small mt">His career has gone its own way.</p>` : ""}`;
 }
 function teamSheet(id) {
@@ -4595,9 +4677,9 @@ function simToSheet() {
 function negSheet(m) {
   const p = P(m.id); if (!p) return "";
   const kind = m.k || "re";
-  const a = p.counter || p.ask || (p.ask = askFor(p, G.year, kind !== "fa"));
-  return `<div class="eyebrow">${kind === "ext" ? "Extension" : kind === "fa" ? "Free agent offer" : "Re-sign"} · ${p.pos}</div><h3>${esc(playerName(p))}</h3>
-  <p class="small">Age ${ageOf(p)} · ${ovrPill(p.ovr)} · ${esc(conLine(p))}</p>
+  const a = kind === "now" ? (p.counter || faNowAsk(p)) : (p.counter || p.ask || (p.ask = askFor(p, G.year, kind !== "fa")));
+  return `<div class="eyebrow">${kind === "ext" ? "Extension" : kind === "fa" ? "Free agent offer · decided when the wave ends" : kind === "now" ? "Free agent · signs on the spot" : "Re-sign"} · ${p.pos}</div><h3>${esc(playerName(p))}</h3>
+  <p class="small">Age ${ageOf(p)} · ${ovrPill(p.ovr)} · ${p.t === -1 ? "Free agent" : esc(conLine(p))}</p>
   <p class="small">His agent wants <b>${a.yrs} years, ${fmtM(a.apy)} a year, ${fmtM(a.gt)} guaranteed</b>.${p.tries ? ` Offers so far: ${p.tries} of 3.` : ""}</p>
   <p class="small">Cap room: ${G.year === 2010 ? "uncapped year" : fmtM(capRoom(userT()))}</p>
   ${negForm(p, kind)}`;
@@ -4869,15 +4951,20 @@ document.addEventListener("click", e => {
     case "trp": { const tr = trState(); const side = tr[k]; const id = +v; side.players = side.players.includes(id) ? side.players.filter(x => x !== id) : [...side.players, id]; UI.keepScroll = true; render(); return; }
     case "trpick": { const tr = trState(); const side = tr[k]; const tid = k === "give" ? G.userTeam : tr.tid; const s = trFindPick(tid, v); if (!s) return; const has = side.picks.some(x => pickKey(x) === v); side.picks = has ? side.picks.filter(x => pickKey(x) !== v) : [...side.picks, s]; UI.keepScroll = true; render(); return; }
     case "trclear": UI.tr = null; UI.keepScroll = true; render(); return;
+    case "trpos": { const tr = trState(); tr.pos = v; tr.tid = null; tr.get = { players: [], picks: [] }; UI.trAll = 0; render(); return; }
+    case "trposback": { const tr = trState(); tr.pos = null; tr.tid = null; tr.get = { players: [], picks: [] }; render(); return; }
+    case "trteamv": { const tr = trState(); tr.tid = +v; tr.get = { players: [], picks: [] }; UI.trAll = 0; render(); window.scrollTo(0, 0); return; }
+    case "trteamback": { const tr = trState(); tr.tid = null; tr.get = { players: [], picks: [] }; render(); return; }
     case "trgo": { const prop = trProp(); const e2 = doTrade(prop); if (e2) return toast(e2); UI.tr = null; act(() => null); toast("Trade done."); return; }
-    case "trwith": UI.tr = null; trState().tid = +v; UI.modal = null; UI.tab = "team"; UI.teamSub = "trades"; render(); window.scrollTo(0, 0); return;
+    case "trwith": UI.tr = null; trState().tid = +v; trState().pos = "ANY"; UI.modal = null; UI.tab = "team"; UI.teamSub = "trades"; render(); window.scrollTo(0, 0); return;
     case "trshop": UI.tr = null; trState().give.players = [+v]; UI.modal = null; UI.tab = "team"; UI.teamSub = "trades"; render(); window.scrollTo(0, 0); return;
     case "offeryes": { const e2 = acceptOfferIn(+v); toast(e2 || "Trade done."); UI.keepScroll = true; render(); saveSoon(); return; }
     case "offerno": (G.offersIn || []).splice(+v, 1); UI.keepScroll = true; render(); saveSoon(); return;
     // contracts and offseason
-    case "negopen": UI.modal = { type: "neg", id: +v, k: k || (G.phase === "off" && G.off.step === "fa" && P(+v).t === -1 ? "fa" : G.phase === "off" && G.off.step === "resign" ? "re" : "ext") }; render(); return;
+    case "negopen": UI.modal = { type: "neg", id: +v, k: k || (P(+v).t === -1 ? (faWaveOpen() ? "fa" : "now") : G.phase === "off" && G.off.step === "resign" ? "re" : "ext") }; render(); return;
     case "resignoffer": { const r = resignOffer(+v, readOffer()); toast(r || "Signed."); if (!r) UI.modal = null; UI.keepScroll = true; render(); saveSoon(); return; }
     case "extoffer": { const r = extendPlayer(+v, readOffer()); toast(r || "Extension signed."); if (!r) UI.modal = null; UI.keepScroll = true; render(); saveSoon(); return; }
+    case "fanow": { const r = signFANow(+v, readOffer()); toast(r || "Signed."); if (!r || /full|signed|cap room/.test(r)) UI.modal = null; UI.keepScroll = true; render(); saveSoon(); return; }
     case "faoffer": { const r = faOffer(+v, readOffer()); toast(r || "Offer made. He decides when the wave ends."); if (!r) UI.modal = null; UI.keepScroll = true; render(); saveSoon(); return; }
     case "faundo": if (G.faw) delete G.faw.offers[+v]; UI.keepScroll = true; render(); saveSoon(); return;
     case "tag": act(() => franchiseTag(+v)); return;
@@ -4909,7 +4996,7 @@ document.addEventListener("click", e => {
     case "proday": act(() => proDay(v)); return;
     case "toboard": if (!G.dc.board.includes(+v)) G.dc.board.push(+v); act(() => null); toast("Added to your board."); return;
     case "unboard": G.dc.board = G.dc.board.filter(x => x !== +v); act(() => null); return;
-    case "bmove": { const b = G.dc.board, i = +v, j = i + +k; if (j < 0 || j >= b.length) return; [b[i], b[j]] = [b[j], b[i]]; act(() => null); return; }
+    case "bmove": { const b = G.dc.board, vis = b.filter(id => posOK("mbPos", P(id))), vi = vis.indexOf(+v), other = vis[vi + +k]; if (other == null) return; const i = b.indexOf(+v), j = b.indexOf(other); [b[i], b[j]] = [b[j], b[i]]; act(() => null); return; }
     case "bclear": G.dc.board = []; act(() => null); return;
     case "ptag": { const id = +v; G.dc.tags[id] = G.dc.tags[id] === k ? undefined : k; if (!G.dc.tags[id]) delete G.dc.tags[id]; act(() => null); return; }
     // coach
