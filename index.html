@@ -615,6 +615,84 @@ body { background: radial-gradient(120% 50% at 50% -10%, color-mix(in srgb, var(
 .posgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
 .posgrid .btn { display: grid; justify-items: center; gap: 0; padding: 10px 4px; }
 .posgrid .btn .small { font-size: .62rem; opacity: .85; }
+
+/* ---- Madden-style free agency, trade and contract screens ---- */
+.mhead { position: relative; overflow: hidden; color: #fff; padding: 14px 16px 12px; background: linear-gradient(120deg, color-mix(in srgb, var(--c) 70%, #061226) 0%, #061226 75%); border-bottom: 3px solid var(--c); }
+.mhead::after { content: ""; position: absolute; right: -30px; top: -20px; width: 140px; height: 140px; background: repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 6px, transparent 6px 14px); transform: skewX(-12deg); pointer-events: none; }
+.mhead-t { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mhead-k { font-family: var(--display); font-weight: 800; font-size: 1.6rem; text-transform: uppercase; letter-spacing: .03em; line-height: 1; }
+.mhead-b { font-family: var(--display); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; background: #ffd84a; color: #061226; padding: 3px 8px; }
+.mhead-s { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 12px; position: relative; z-index: 1; }
+.mhead-s div { display: grid; gap: 1px; background: rgba(255,255,255,.08); border-left: 3px solid var(--c); padding: 6px 8px; min-width: 0; }
+.mhead-s span { font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; opacity: .75; font-family: var(--display); font-weight: 700; }
+.mhead-s b { font-family: var(--display); font-weight: 800; font-size: clamp(.95rem, 4.4vw, 1.25rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mhead-n { margin: 8px 0 0; font-size: .8rem; opacity: .85; position: relative; z-index: 1; }
+.mtable { display: grid; background: var(--surface); border: 1px solid var(--line); }
+.mrow { display: grid; grid-template-columns: 42px 34px minmax(0, 1fr) 70px 26px; align-items: center; gap: 8px; padding: 8px 10px; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; width: 100%; color: inherit; min-height: 52px; }
+.mrow:first-child { border-top: 0; }
+.mrow-h { min-height: 0; padding: 6px 10px; background: #061226; color: #c9d4ea; font-family: var(--display); font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; }
+.mrow-h span:nth-child(4) { text-align: right; }
+button.mrow:active { background: var(--surface2); }
+.mrow.offered { background: color-mix(in srgb, var(--team-hi) 14%, transparent); box-shadow: inset 4px 0 0 var(--team-hi); }
+.m-ovr { display: grid; place-items: center; width: 40px; height: 34px; font-family: var(--display); font-weight: 800; font-size: 1.2rem; color: #fff; background: #4a5568; clip-path: polygon(0 0, 100% 0, 100% 75%, 85% 100%, 0 100%); }
+.m-ovr.md { background: #1d6fd6; } .m-ovr.hi { background: linear-gradient(135deg, #d4a017, #f3cf55); color: #1a1300; } .m-ovr.pk { background: #0b2253; font-size: .95rem; }
+.m-pos { font-family: var(--display); font-weight: 800; font-size: .9rem; color: var(--muted); }
+.m-name { display: grid; min-width: 0; }
+.m-name b { font-family: var(--display); font-weight: 700; font-size: 1.02rem; text-transform: uppercase; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-name small, .m-ask small, .tcard-m small { color: var(--muted); font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-ask { display: grid; justify-items: end; text-align: right; }
+.m-ask b { font-family: var(--display); font-weight: 800; font-size: .98rem; }
+.m-int { height: 32px; width: 10px; justify-self: center; background: var(--surface2); border: 1px solid var(--line); display: flex; align-items: flex-end; }
+.m-int i { display: block; width: 100%; }
+.m-int i.go, .meter-bar i.go { background: #19b46b; } .m-int i.mid, .meter-bar i.mid { background: #f2b630; } .m-int i.low, .meter-bar i.low { background: #e0443a; }
+.m-add { font-family: var(--display); font-weight: 800; font-size: 1.3rem; color: var(--team-hi); text-align: center; }
+.mcard { display: grid; grid-template-columns: 74px minmax(0, 1fr); color: #fff; background: linear-gradient(120deg, color-mix(in srgb, var(--c) 75%, #061226), #061226 80%); border-bottom: 3px solid var(--c); margin: 6px 0 10px; }
+.mcard-ovr { display: grid; place-items: center; align-content: center; background: rgba(0,0,0,.28); padding: 10px 0; }
+.mcard-ovr b { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1; }
+.mcard-ovr span { font-family: var(--display); font-weight: 700; font-size: .7rem; letter-spacing: .1em; opacity: .8; }
+.mcard-main { padding: 10px 12px; min-width: 0; display: grid; gap: 2px; }
+.mcard-pos { font-family: var(--display); font-weight: 700; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #ffd84a; }
+.mcard-name { font-family: var(--display); font-weight: 800; font-size: 1.45rem; text-transform: uppercase; line-height: 1.05; overflow-wrap: anywhere; }
+.mcard-sub { font-size: .76rem; opacity: .85; }
+.mcard-at { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.mcard-at span { font-family: var(--display); font-size: .72rem; font-weight: 700; letter-spacing: .04em; background: rgba(255,255,255,.12); padding: 2px 6px; }
+.mstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.mstats div { display: grid; background: var(--surface2); border-left: 3px solid var(--team-hi); padding: 6px 8px; min-width: 0; }
+.mstats span { font-family: var(--display); font-weight: 700; font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.mstats b { font-family: var(--display); font-weight: 800; font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mstats small { font-size: .7rem; color: var(--muted); }
+.ofm { display: grid; gap: 10px; }
+.ofm-row { display: grid; grid-template-columns: 78px minmax(0, 1fr) 72px; align-items: center; gap: 8px; }
+.ofm-l { font-family: var(--display); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.ofm-v { font-family: var(--display); font-weight: 800; font-size: 1.05rem; text-align: right; }
+.ofm input[type=range] { width: 100%; accent-color: var(--team-hi); min-height: 32px; }
+.ofm-tot { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); padding-top: 8px; font-family: var(--display); font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .05em; }
+.ofm-tot b { font-size: 1.3rem; }
+.meter { display: grid; gap: 4px; margin: 10px 0 6px; }
+.meter-h { display: flex; justify-content: space-between; font-family: var(--display); font-weight: 700; text-transform: uppercase; font-size: .8rem; letter-spacing: .05em; }
+.meter-h b { font-size: 1.05rem; }
+.meter-bar { position: relative; height: 12px; background: var(--surface2); border: 1px solid var(--line); overflow: hidden; }
+.meter-bar i { display: block; height: 100%; transition: width .25s; }
+.meter-bar.zones { background: linear-gradient(90deg, color-mix(in srgb, #e0443a 22%, var(--surface2)) 0 68%, color-mix(in srgb, #f2b630 22%, var(--surface2)) 68% 80%, color-mix(in srgb, #19b46b 22%, var(--surface2)) 80%); }
+.meter-line { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
+.mtrade { background: var(--surface); border: 1px solid var(--line); padding: 0 0 12px; display: grid; gap: 10px; }
+.mtrade > :not(.mtrade-top) { margin: 0 12px; }
+.mtrade-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: stretch; background: #061226; color: #fff; }
+.mt-team { display: grid; justify-items: center; gap: 2px; padding: 10px 6px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 60%, #061226), #061226); border-bottom: 3px solid var(--c); min-width: 0; text-align: center; }
+.mt-team b { font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: .04em; }
+.mt-team small { font-size: .7rem; opacity: .85; overflow-wrap: anywhere; }
+.mt-swap { display: grid; place-items: center; padding: 0 8px; font-size: 1.4rem; color: #ffd84a; }
+.tcols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.tcol { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.tcol-h { font-family: var(--display); font-weight: 800; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); border-bottom: 2px solid var(--team-hi); padding-bottom: 3px; }
+.tcol-e { margin: 0; font-size: .78rem; color: var(--muted); border: 1px dashed var(--line); padding: 12px 6px; text-align: center; }
+.tcard { display: grid; grid-template-columns: 40px minmax(0, 1fr) 14px; gap: 6px; align-items: center; padding: 5px 6px 5px 0; background: var(--surface2); border: 1px solid var(--line); text-align: left; color: inherit; width: 100%; min-width: 0; }
+.tcard .m-ovr { width: 38px; height: 32px; font-size: 1.05rem; }
+.tcard-m { display: grid; min-width: 0; }
+.tcard-m b { font-family: var(--display); font-weight: 700; font-size: .92rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tcard-x { color: var(--muted); font-weight: 700; }
+@media (max-width: 360px) { .mrow { grid-template-columns: 38px 30px minmax(0, 1fr) 62px 22px; gap: 6px; padding: 8px; } .m-ovr { width: 36px; } .mhead-k { font-size: 1.35rem; } .ofm-row { grid-template-columns: 66px minmax(0, 1fr) 64px; } }
+@media (max-width: 360px) { .tcols { grid-template-columns: 1fr; } }
 </style>
 <div id="app"></div>
 
@@ -1056,18 +1134,39 @@ function userControls(t) { return t.id === G.userTeam && isGM(); }
 
 // ---------- real-history sync ----------
 // put every AI team on its real roster for this point of the season
+// players who missed a whole season hurt don't show up on weekly rosters that year: keep them on injured reserve
+const _LOST = {};
+function lostSeason(y) {
+  if (_LOST[y]) return _LOST[y];
+  const out = new Map(), now = tlSeason(y), prev = tlSeason(y - 1);
+  if (now.size && prev.size) for (const [idx] of prev) {
+    if (now.has(idx)) continue;
+    const back = [y + 1, y + 2].find(yy => tlSeason(yy).has(idx)); if (!back) continue;
+    const e = realSeasonEnd(idx, y - 1), s = realSeasonStart(idx, back);
+    const t = s && e && s.t === e.t ? s.t : e ? e.t : s ? s.t : -1;
+    if (t >= 0) out.set(idx, t);
+  }
+  return (_LOST[y] = out);
+}
 function syncReal(y, wk, opts) {
   opts = opts || {};
   const tl = tlSeason(y); if (!tl.size) return;
   const want = new Map();   // pid -> {t, lst}
   for (const [idx, ev] of tl) {
-    const st = realStateAt(idx, y, wk); if (!st) continue;
+    const st = realStateAt(idx, y, wk);
+    if (!st) {
+      // holdouts, suspensions and injuries before his first game: his team still holds his rights
+      if (wk >= 100) continue; const s0 = realSeasonStart(idx, y), e = realSeasonEnd(idx, y - 1);
+      if (s0 && s0.w > wk && e && e.t === s0.t && ONTEAM[s0.c]) { const q = G.players[idx] || realPlayer(idx, y); if (q && !q.ret && !q.dv) want.set(q.id, { t: s0.t, lst: "r" }); }
+      continue;
+    }
     const p = G.players[idx] || (ONTEAM[st.c] ? realPlayer(idx, y) : null); if (!p || p.ret) continue;
     // the player's body: real injuries and suspensions follow him wherever he is
     p.realCode = st.c;
     if (!ONTEAM[st.c]) continue;
     want.set(p.id, { t: st.t, lst: st.c === "D" ? "p" : (st.c === "R" || st.c === "N" || st.c === "S") ? "r" : "a" });
   }
+  if (wk < 100) for (const [idx, tid] of lostSeason(y)) { const p = G.players[idx] || realPlayer(idx, y); if (!p || p.ret || p.dv) continue; p.inj = 99; want.set(p.id, { t: tid, lst: "r" }); }
   for (const t of G.teams) {
     if (userControls(t)) continue;
     // real players who are no longer with this team (cut or traded in real life)
@@ -1105,7 +1204,9 @@ function trimTeam(t) {
 function fillTeam(t, y, wk) {
   const need = {};
   for (const pos of POS) { const have = t.roster.filter(id => P(id).pos === pos).length; need[pos] = Math.max(0, ROSTER_MIN[pos] - have); }
-  const pool = () => freeAgents().filter(p => !p.hold);
+  // in real seasons the last spots go to camp-level players, so the better veterans stay on the market
+  const cap = y <= LAST_REAL ? 64 : 99;
+  const pool = () => freeAgents().filter(p => !p.hold && p.ovr <= cap);
   for (const pos of POS) {
     while (need[pos] > 0) {
       const c = pool().filter(p => p.pos === pos).sort((a, b) => b.ovr - a.ovr)[0];
@@ -1536,9 +1637,12 @@ function budgetFor(t) { return { total: 40 + Math.round(rnd() * 10), fac: 0, sco
 
 // ---------- season start ----------
 // a new season: real players take their real level for the year, everyone else ages
+function gameDev(p) { return p.t === G.userTeam && p.idx >= 0 && (p.ownDev === "game" || (p.ownDev !== "real" && G.myDev === "game")); }
 function seasonRatings(y) {
   for (const p of Object.values(G.players)) {
     if (p.ret || p.t === -3 || p.rated === y) continue;
+    // your players can grow with the game's development instead of their real careers
+    if (gameDev(p)) { if (p.rookie !== y) p.ovr = clamp(p.ovr + ageStep(p, y), 30, 99); p.rated = y; calcAttrs(p); continue; }
     const lr = p.idx >= 0 ? realLastRatedYear(p.idx) : 0;
     if (p.idx >= 0 && y <= lr && realRating(p.idx, y)) p.ovr = clamp(realRating(p.idx, y) + (p.nudge || 0), 30, 99);
     else if (p.idx >= 0 && y <= LAST_REAL && y <= lr) { /* a missed season: keep */ }
@@ -1672,6 +1776,7 @@ function advanceCore() {
   if (G.phase === "off") offseasonNext();
 }
 function weeklyUpkeep() {
+  if (typeof ensureFAPool === "function") ensureFAPool();
   for (const p of Object.values(G.players)) { if (p.inj > 0 && p.inj < 99) p.inj--; }
   // in-season growth for young players on your team
   if (G.week % 4 === 0) for (const id of allIds(userT())) { const p = P(id); if (ageOf(p) <= 25 && rnd() < pv("Position Guru", [0.1, 0.35, 0.5, 0.7])) { p.nudge = (p.nudge || 0) + 1; p.ovr = clamp(p.ovr + 1, 30, 99); calcAttrs(p); } }
@@ -2244,13 +2349,15 @@ function startFA() {
     }
   }
   // free agents from last year who never signed: real ones that don't come back retire
-  for (const p of freeAgents()) { if (p.idx >= 0 && !p.dv && !tlSeason(y).has(p.idx) && y <= LAST_REAL) retire(p); }
+  for (const p of freeAgents()) { if (p.idx >= 0 && !p.dv && !p.streetY && !tlSeason(y).has(p.idx) && !lostSeason(y).has(p.idx) && y <= LAST_REAL) { if (ageOf(p, y) <= 32 && p.ovr >= 58 && (PL[p.idx][12] || 0) < y) { p.streetY = y + 1; p.dv = 1; p.ovr = clamp(p.ovr - 3, 40, 99); calcAttrs(p); } else retire(p); } }
   for (const p of freeAgents()) p.ask = askFor(p, y, false);
 }
 function aiFASign(w) {
   const y = G.year;
   const offScript = p => y > LAST_REAL || p.dv || p.idx < 0;
   for (const t of shuffle(G.teams.filter(t => !userControls(t)))) {
+    // in real seasons the real rosters fill themselves at cut-down; only short-handed teams shop off-script
+    if (y <= LAST_REAL) continue;
     const nd = posNeeds(t); let k = w === 3 ? 4 : 2;
     for (const pos of POS.slice().sort((a, b) => (nd[b] || 0) - (nd[a] || 0))) {
       if (k <= 0) break; if ((nd[pos] || 0) < (w === 3 ? 1.5 : 2.5)) continue;
@@ -2265,17 +2372,35 @@ function aiFASign(w) {
 function ensureFAPool() {
   const y = G.year, have = {}; for (const p of freeAgents()) have[p.pos] = (have[p.pos] || 0) + 1;
   const want = { QB: 5, RB: 7, WR: 9, TE: 6, OL: 10, DL: 10, LB: 8, CB: 9, S: 7, K: 3, P: 3 };
-  for (const pos of POS) for (let n = have[pos] || 0; n < want[pos]; n++) { const p = genPlayer({ pos, ovr: R(52, 63), age: R(24, 30) }); p.t = -1; p.lst = "f"; p.con = null; if (!G.fa.includes(p.id)) G.fa.push(p.id); }
+  for (const pos of POS) for (let n = have[pos] || 0; n < want[pos]; n++) { const p = genPlayer({ pos, ovr: n < 2 ? R(60, 67) : R(52, 62), age: R(24, 31) }); p.t = -1; p.lst = "f"; p.con = null; if (!G.fa.includes(p.id)) G.fa.push(p.id); }
 }
 function seedVeteranFAs(y) {
   if (y > LAST_REAL || !tlSeason(y - 1).size) return;
   const now = tlSeason(y);
   for (const [idx] of tlSeason(y - 1)) {
-    if (G.players[idx] || now.has(idx)) continue;
+    if (G.players[idx] || now.has(idx) || (PL[idx][12] || 0) >= y) continue;
     const age = PL[idx][2] ? y - PL[idx][2] : 30; if (age > 34) continue;
     const r = realRating(idx, y - 1); if (!r || r < 58) continue;
     const p = realPlayer(idx, y); p.ovr = clamp(r - (age >= 31 ? 2 : 0), 40, 90); calcAttrs(p); p.t = -1; p.lst = "f"; p.con = null; p.dv = 1; if (!G.fa.includes(p.id)) G.fa.push(p.id);
   }
+}
+// how much a free agent wants to play for you: winning, your reputation, a clear path to playing time
+function faInterest(p) {
+  const u = userT(); const nd = posNeeds(u)[p.pos] || 0;
+  const v = 50 + (pct(u) - 0.5) * 40 + ((u.lastWin || 0.5) - 0.5) * 30 + (G.coach.rep - 50) * 0.5 + Math.min(4, nd) * 5 - (p.fromUser ? 12 : 0) + (hrand(p.id, G.year) - 0.5) * 24;
+  return clamp(Math.round(v), 5, 99);
+}
+// chance an offer gets accepted, matching how agents decide
+function offerOdds(p, offer, kind) {
+  const ask = kind === "now" ? (p.counter || faNowAsk(p)) : (p.counter || p.ask || askFor(p, G.year, kind !== "fa"));
+  const thr = 0.97 - pv("Negotiator", [0, 0.02, 0.04, 0.06]);
+  const r = offer.apy / Math.max(0.01, ask.apy);
+  const fa = r >= thr ? 1 : clamp((r - 0.82) / (thr - 0.82), 0, 1) * 0.85;
+  const fg = !ask.gt || offer.gt >= ask.gt * 0.8 ? 1 : clamp(offer.gt / (ask.gt * 0.8), 0, 1) * 0.85;
+  const dy = Math.abs(offer.yrs - ask.yrs), fy = dy <= 1 ? 1 : dy === 2 ? 0.35 : 0.1;
+  let o = fa * fg * fy;
+  if (kind === "fa") o *= 0.55 + faInterest(p) / 250;   // other teams are bidding too
+  return Math.round(o * 100);
 }
 function faWaveOpen() { return G.phase === "off" && G.off && G.off.step === "fa" && G.faw && G.faw.wave < 3; }
 function faRosterMax() { return G.phase === "off" ? 75 : G.phase === "pre" ? 60 : ROSTER_MAX; }
@@ -2285,6 +2410,7 @@ function faNowAsk(p) {
   const a = askFor(p, G.year, false); let { apy, yrs, gt } = a;
   if (G.phase === "reg" || G.phase === "post") { apy = Math.max(minSalary(G.year, expOf(p)), Math.round(apy * Math.max(0.45, 1 - G.week * 0.035) * 100) / 100); yrs = 1; gt = 0; }
   else if (G.phase === "pre") { apy = Math.max(minSalary(G.year, expOf(p)), Math.round(apy * 0.8 * 100) / 100); yrs = Math.min(yrs, 2); gt = Math.round(gt * 0.5 * 10) / 10; }
+  apy = Math.max(minSalary(G.year, expOf(p)), Math.round(apy * (1.05 - faInterest(p) / 1000) * 100) / 100);
   p.ask = { apy, yrs, gt }; p.askK = key; p.tries = 0; p.counter = null; return p.ask;
 }
 function signFANow(id, offer) {
@@ -2476,8 +2602,8 @@ function evalTrade(prop) {
   if (G.year !== 2010 && capIn > capRoom(userT()) + 0.01) return { ok: false, why: "You don't have the cap room for that." };
   const rosterAfter = userT().roster.length + (prop.get.players || []).length - (prop.give.players || []).length;
   if (rosterAfter > ROSTER_MAX + 2) return { ok: false, why: "Your roster would be over 53." };
-  if (vin >= vout * need) return { ok: true, vin, vout };
-  return { ok: false, vin, vout, why: vin >= vout * 0.85 ? "Close. They want a little more." : "Not interested at that price." };
+  if (vin >= vout * need) return { ok: true, vin, vout, need };
+  return { ok: false, vin, vout, need, why: vin >= vout * 0.85 ? "Close. They want a little more." : "Not interested at that price." };
 }
 function doTrade(prop) {
   const e = evalTrade(prop); if (!e.ok) return e.why;
@@ -2517,6 +2643,11 @@ function aiTradeOffers() {
     mail(`${t.name} front office`, `Trade offer for ${playerName(p)}`, `They'd give ${give.map(s => s.pk ? "pick " + s.pk : s.y + " round " + s.rd).join(", ")} for ${p.pos} ${playerName(p)}. Answer from the Trades screen.`, "gm");
     break;
   }
+}
+// offers still on the table: this season, player still yours, and not more than three weeks old in-season
+function liveOffers() {
+  G.offersIn = (G.offersIn || []).filter(o => o.y === G.year && P(o.want) && P(o.want).t === G.userTeam && !(G.phase === "reg" && G.week - (o.wk || 0) > 3));
+  return G.offersIn;
 }
 function acceptOfferIn(i) {
   const o = (G.offersIn || [])[i]; if (!o) return "That offer is gone.";
@@ -2590,10 +2721,13 @@ function retirements(y) {
   for (const p of Object.values(G.players)) {
     if (p.ret || p.t === -3) continue;
     const age = ageOf(p, y);
-    if (p.idx >= 0 && y < LAST_REAL) {
+    if (p.idx >= 0 && y < LAST_REAL && !gameDev(p)) {
       const last = PL[p.idx][12] || 0;
-      if (last && last <= y) {
+      if (p.streetY && p.streetY <= y && p.t === -1) { retire(p); continue; }
+      if (last && last <= y && !p.streetY) {
         const great = p.ovr >= 82 && age <= 33 && (p.dv || p.t === G.userTeam);
+        // a lot of real careers end because nobody called: younger ones hang around as street free agents for a year
+        if (p.t !== G.userTeam && age <= 32 && p.ovr >= 58 && rnd() < 0.65) { p.streetY = y + 1; p.dv = 1; p.ovr = clamp(p.ovr - 3, 40, 99); calcAttrs(p); if (p.t >= 0) toFA(p); continue; }
         if (!great || rnd() < 0.75) { if (p.t === G.userTeam) addNews(`${p.pos} ${playerName(p)} retires.`); retire(p); }
       }
       continue;
@@ -3698,9 +3832,9 @@ function renderHome() {
 function todoList() {
   const u = userT(), out = [];
   if (G.coach.pts) out.push([`${G.coach.pts} skill point${G.coach.pts > 1 ? "s" : ""} to spend`, "more", "coach"]);
-  if ((G.offersIn || []).length && canTrade()) out.push([`${G.offersIn.length} trade offer${G.offersIn.length > 1 ? "s" : ""}`, "team", "trades"]);
+  const offs = liveOffers(); if (offs.length && canTrade() && isGM()) out.push([`${offs.length} trade offer${offs.length > 1 ? "s" : ""}`, "team", "trades"]);
   if (G.promo) out.push(["Promotion offer waiting", "more", "coach"]);
-  const hold = allIds(u).map(P).filter(p => p.hold || p.wantsOut); if (hold.length && isGM()) out.push([`${hold.length} unhappy player${hold.length > 1 ? "s" : ""}`, "team", "cap"]);
+  const hold = allIds(u).map(P).filter(p => p.hold || p.wantsOut); if (hold.length && isGM()) out.push([`${hold.length} player${hold.length > 1 ? "s want" : " wants"} a trade or a new deal`, "team", "trades"]);
   if (isGM() && G.phase !== "off" && u.roster.length < 53) out.push([`Roster has ${u.roster.length} of 53`, "team", "roster"]);
   if (G.dc && !G.dc.board.length && G.phase === "reg") out.push(["Start a draft board", "scout", "board"]);
   if (!myGoals().length && G.phase !== "off") out.push(["Set your season goals", "more", "coach"]);
@@ -3821,8 +3955,26 @@ function resignPanel() {
 }
 function negForm(p, kind) {
   const a = kind === "now" ? (p.counter || faNowAsk(p)) : (p.counter || p.ask || askFor(p, G.year, kind !== "fa"));
-  return `<div class="offer-form mt"><label>Years<input class="inp" id="ofY" type="number" min="1" max="6" value="${a.yrs}"></label><label>Per year ($M)<input class="inp" id="ofA" type="number" step="0.1" min="0.3" value="${a.apy}"></label><label>Guaranteed ($M)<input class="inp" id="ofG" type="number" step="0.5" min="0" value="${a.gt}"></label></div>
-  <button class="btn pri wide mt" data-a="${kind === "now" ? "fanow" : kind === "fa" ? "faoffer" : kind === "ext" ? "extoffer" : "resignoffer"}" data-v="${p.id}">Make the offer</button>`;
+  const lo = minSalary(G.year, expOf(p)), hi = Math.max(lo + 1, Math.round(a.apy * 1.6 * 10) / 10);
+  const odds = offerOdds(p, a, kind);
+  return `<div class="ofm" data-pid="${p.id}" data-kind="${kind}">
+  <div class="ofm-row"><span class="ofm-l">Years</span><input type="range" id="ofY" data-ch="offr" min="1" max="6" step="1" value="${a.yrs}"><b class="ofm-v" id="ofYv">${a.yrs}</b></div>
+  <div class="ofm-row"><span class="ofm-l">Per year</span><input type="range" id="ofA" data-ch="offr" min="${lo}" max="${hi}" step="0.05" value="${a.apy}"><b class="ofm-v" id="ofAv">${fmtM(a.apy)}</b></div>
+  <div class="ofm-row"><span class="ofm-l">Guaranteed</span><input type="range" id="ofG" data-ch="offr" min="0" max="${Math.max(1, Math.ceil(hi * 6))}" step="0.1" value="${a.gt}"><b class="ofm-v" id="ofGv">${fmtM(a.gt)}</b></div>
+  <div class="ofm-tot"><span>Total value</span><b id="ofT">${fmtM(a.apy * a.yrs)}</b></div>
+  <div class="meter"><div class="meter-h"><span>${kind === "fa" ? "Offer strength" : "Chance he signs"}</span><b id="ofOdds">${odds}%</b></div><div class="meter-bar"><i id="ofBar" class="${odds >= 100 ? "go" : odds >= 50 ? "mid" : "low"}" style="width:${odds}%"></i></div><p class="dim small" id="ofTxt">${oddsText(odds, kind)}</p></div>
+  <button class="btn pri wide mt" data-a="${kind === "now" ? "fanow" : kind === "fa" ? "faoffer" : kind === "ext" ? "extoffer" : "resignoffer"}" data-v="${p.id}">${kind === "fa" ? "Submit offer" : "Offer contract"}</button></div>`;
+}
+function oddsText(o, kind) { if (kind === "fa") return o >= 85 ? "Strong offer. Other teams are bidding, so nothing's certain until the wave ends." : o >= 50 ? "In the mix with other teams." : "Other teams will likely beat this."; return o >= 100 ? "He'll sign this." : o >= 60 ? "Close. His agent will probably counter." : o >= 25 ? "Short of what he wants." : "Not even close."; }
+function updOfferUI() {
+  const box = document.querySelector(".ofm"); if (!box) return;
+  const p = P(+box.dataset.pid), kind = box.dataset.kind; if (!p) return;
+  const y = +document.getElementById("ofY").value, apy = +document.getElementById("ofA").value, gEl = document.getElementById("ofG");
+  if (+gEl.value > apy * y) gEl.value = Math.round(apy * y * 10) / 10;
+  const gt = +gEl.value;
+  document.getElementById("ofYv").textContent = y; document.getElementById("ofAv").textContent = fmtM(apy); document.getElementById("ofGv").textContent = fmtM(gt); document.getElementById("ofT").textContent = fmtM(apy * y);
+  const o = offerOdds(p, { yrs: y, apy, gt }, kind); const bar = document.getElementById("ofBar");
+  document.getElementById("ofOdds").textContent = o + "%"; bar.style.width = o + "%"; bar.className = o >= 100 ? "go" : o >= 50 ? "mid" : "low"; document.getElementById("ofTxt").textContent = oddsText(o, kind);
 }
 function faPanel() {
   const w = G.faw ? G.faw.wave : 0;
@@ -3903,19 +4055,25 @@ function rosterView() {
   ${isGM() && wv.length && (G.phase === "pre" || (G.phase === "reg" && G.week <= 3)) ? `<section class="card flush"><div class="pad eyebrow">Waiver wire</div><p class="pad dim small">Claims go in reverse order of last season's record.</p>${wv.slice(0, 20).map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">age ${ageOf(p)}</span></span>${ovrPill(p.ovr)}<button class="btn sm" data-a="claim" data-v="${p.id}">Claim</button></div>`).join("")}</section>` : ""}
   ${isGM() ? `<button class="btn wide" data-a="set" data-k="teamSub" data-v="fa">Browse free agents</button>` : ""}`;
 }
-// free agents, all year
+// free agents, all year (Madden-style board)
 function faView() {
   const pos = UI.faPos || "All", u = userT(), wave = faWaveOpen();
   const sort = UI.faSort || "ovr";
   let list = faTargets().filter(p => !p.ret && (pos === "All" || p.pos === pos));
+  const askOf = p => wave ? (p.ask || askFor(p, G.year)) : faNowAsk(p);
   if (sort === "young") list = list.filter(p => ageOf(p) <= 26);
-  if (sort === "cheap") list = list.slice().sort((a, b) => (wave ? (a.ask || askFor(a, G.year)).apy : faNowAsk(a).apy) - (wave ? (b.ask || askFor(b, G.year)).apy : faNowAsk(b).apy) || b.ovr - a.ovr);
-  const lim = UI.faLim || 40;
-  const note = !isGM() ? "The general manager makes signings. You can look." : wave ? `Free agency wave ${G.faw.wave + 1} of 3: offers are decided when the wave ends, and real teams bid too.` : G.phase === "reg" || G.phase === "post" ? `In-season free agents sign one-year deals on the spot, and their asks drop as the weeks go by. Your roster: ${u.roster.length}/53.` : G.phase === "pre" ? `Camp bodies and veterans looking for a job sign on the spot. Roster ${u.roster.length} (cut to 53 on cut-down day).` : `Free agents sign on the spot right now. The big market opens with free agency.`;
-  return `<section class="card"><div class="eyebrow">Free agents · ${faTargets().length} available</div><p class="small">${note}</p>${isGM() ? `<p class="small">Cap room <b>${G.year === 2010 ? "uncapped" : fmtM(capRoom(u))}</b>${(G.faw && G.faw.offers && Object.keys(G.faw.offers).length && wave) ? ` · ${Object.keys(G.faw.offers).length} offer${Object.keys(G.faw.offers).length > 1 ? "s" : ""} out` : ""}</p>` : ""}</section>
+  if (sort === "cheap") list = list.slice().sort((a, b) => askOf(a).apy - askOf(b).apy || b.ovr - a.ovr);
+  if (sort === "int") list = list.slice().sort((a, b) => faInterest(b) - faInterest(a));
+  const lim = UI.faLim || 40, offers = wave ? Object.keys(G.faw.offers || {}).length : 0;
+  const phase = wave ? `Wave ${G.faw.wave + 1} of 3` : G.phase === "reg" || G.phase === "post" ? `Week ${G.week}` : G.phase === "pre" ? "Training camp" : "Offseason";
+  const note = !isGM() ? "The general manager makes signings. You can look." : wave ? "Offers are decided when the wave ends. Real teams bid too." : G.phase === "reg" || G.phase === "post" ? "In-season deals are one year, signed on the spot. Asks drop every week." : "Free agents sign on the spot.";
+  return `<section class="mhead" style="--c:${u.color}"><div class="mhead-t"><span class="mhead-k">Free agency</span><span class="mhead-b">${phase}</span></div>
+    <div class="mhead-s"><div><span>Cap space</span><b>${G.year === 2010 ? "None" : fmtM(capRoom(u))}</b></div><div><span>Roster</span><b>${u.roster.length}/${G.phase === "off" ? 75 : 53}</b></div><div><span>${wave ? "Offers out" : "Available"}</span><b>${wave ? offers : faTargets().length}</b></div></div>
+    <p class="mhead-n">${note}</p></section>
   ${chipsPos("faPos")}
-  <div class="seg">${[["ovr", "Best"], ["young", "26 and under"], ["cheap", "Cheapest"]].map(([k, l]) => `<button class="${sort === k ? "on" : ""}" data-a="set" data-k="faSort" data-v="${k}">${l}</button>`).join("")}</div>
-  <section class="card flush">${list.slice(0, lim).map(p => { const a = wave ? (p.ask || askFor(p, G.year)) : faNowAsk(p); const off = wave && G.faw.offers[p.id]; return `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} ${injTag(p)}<br><span class="dim small">age ${ageOf(p)} · asks ${a.yrs} yr${a.yrs > 1 ? "s" : ""}, ${fmtM(a.apy)}${p.fromUser ? " · was yours" : ""}${off ? ` · <b>offered ${fmtM(off.apy)}</b>` : ""}</span></span>${ovrPill(p.ovr)}${isGM() ? `<button class="btn sm ${off ? "" : "pri"}" data-a="negopen" data-v="${p.id}">${off ? "Change" : wave ? "Offer" : "Sign"}</button>` : ""}</div>`; }).join("") || `<p class="pad dim small">Nobody available at this spot.</p>`}</section>
+  <div class="seg">${[["ovr", "Overall"], ["int", "Interest"], ["young", "26 & under"], ["cheap", "Price"]].map(([k, l]) => `<button class="${sort === k ? "on" : ""}" data-a="set" data-k="faSort" data-v="${k}">${l}</button>`).join("")}</div>
+  <section class="mtable"><div class="mrow mrow-h"><span>OVR</span><span>POS</span><span>Player</span><span>Asking</span><span>Int.</span></div>
+  ${list.slice(0, lim).map(p => { const a = askOf(p), off = wave && G.faw.offers[p.id], int = faInterest(p); return `<button class="mrow ${off ? "offered" : ""}" data-a="${isGM() ? "negopen" : "player"}" data-v="${p.id}"><span class="m-ovr ${p.ovr >= 80 ? "hi" : p.ovr >= 70 ? "md" : ""}">${p.ovr}</span><span class="m-pos">${p.pos}</span><span class="m-name"><b>${esc(playerName(p))}</b><small>Age ${ageOf(p)} · ${expOf(p) ? expOf(p) + " yrs exp" : "rookie"}${p.fromUser ? " · was yours" : ""}${off ? ` · offered ${fmtM(off.apy)}` : ""}</small></span><span class="m-ask"><b>${fmtM(a.apy)}</b><small>${a.yrs} yr${a.yrs > 1 ? "s" : ""}</small></span><span class="m-int"><i style="height:${int}%" class="${int >= 70 ? "go" : int >= 45 ? "mid" : "low"}"></i></span></button>`; }).join("") || `<p class="pad dim small">Nobody available at this spot.</p>`}</section>
   ${list.length > lim ? `<button class="btn wide" data-a="set" data-k="faLim" data-v="${lim + 40}">Show more</button>` : ""}`;
 }
 function depthView() {
@@ -3969,7 +4127,7 @@ function pickKey(s) { return s.pk ? `${s.y || draftYearNow()}:${s.pk}` : `${s.y}
 function pickTxt(s) { return s.pk ? `${s.y || draftYearNow()} round ${s.rd}, pick ${s.pk}${s.orig !== s.own ? ` (${T(s.orig).abbr})` : ""}` : `${s.y} round ${s.rd}${s.orig !== s.own ? ` (${T(s.orig).abbr})` : ""}`; }
 function tradesView() {
   if (!isGM()) return `<section class="card"><p class="small">Trades are the general manager's call.</p></section>`;
-  const offers = (G.offersIn || []).filter(o => o.y === G.year);
+  const offers = liveOffers();
   const tr = trState(), u = userT();
   const open = canTrade();
   const dl = tradeDeadlineWeek(G.year);
@@ -4006,12 +4164,29 @@ function tradesView() {
       builder = `<section class="card flush"><div class="pad"><div class="eyebrow">Trade builder · step 2 of 2</div><p class="small">${posName ? `Teams with the best ${posName}s. Pick a team to talk to.` : "Pick a team to talk to."} <button class="link small" data-a="trposback">Change position</button></p></div>
         ${rows.map(({ t, best }) => `<button class="li" data-a="trteamv" data-v="${t.id}">${chip(t)}<span class="grow"><b>${esc(t.name)}</b> <span class="dim small">${recStr(t)}</span>${best.length ? `<br><span class="small dim">${best.map(p => `${esc(playerName(p))} ${p.ovr}`).join(" · ")}</span>` : ""}</span><span class="dim">›</span></button>`).join("")}</section>`;
     } else {
-      builder = `<section class="card"><div class="eyebrow">Trade builder · deadline week ${dl}</div>
-        <div class="row between wrap gap"><span class="row gap">${chip(partner)}<b>${esc(partner.name)}</b></span><span class="small"><button class="link small" data-a="trposback">${posName ? esc(posName) : "Any position"}</button> · <button class="link small" data-a="trteamback">Change team</button></span></div>
-        <p class="small mt">Their needs: ${Object.entries(posNeeds(partner)).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join(", ")}</p>${side(partner.id, tr.get, "You get", true)}${side(u.id, tr.give, "You give", false)}<button class="link small" data-a="set" data-k="trAll" data-v="${UI.trAll ? 0 : 1}">${UI.trAll ? (posName ? `Only ${posName}s` : "Show fewer players") : posName ? "Show every position" : "Show the whole roster"}</button>${verdict}<button class="link small" data-a="trclear">Start over</button></section>`;
+      const e = (tr.give.players.length + tr.give.picks.length) && (tr.get.players.length + tr.get.picks.length) ? evalTrade(trProp()) : null;
+      const ratio = e && e.vout ? e.vin / (e.vout * (e.need || 1.08)) : 0;
+      const fill = clamp(ratio * 80, 0, 100);
+      const pcard = (id, k) => { const p = P(id); return `<button class="tcard" data-a="trp" data-k="${k}" data-v="${id}" aria-label="Remove"><span class="m-ovr ${p.ovr >= 80 ? "hi" : p.ovr >= 70 ? "md" : ""}">${p.ovr}</span><span class="tcard-m"><b>${esc(p.f[0] + ". " + p.l)}</b><small>${p.pos} · ${ageOf(p)} · ${p.con ? fmtM(p.con.apy) + "×" + Math.max(0, p.con.yrs) : ""}</small></span><span class="tcard-x">×</span></button>`; };
+      const kcard = (s0, k) => `<button class="tcard pick" data-a="trpick" data-k="${k}" data-v="${esc(pickKey(s0))}"><span class="m-ovr pk">R${s0.rd}</span><span class="tcard-m"><b>${s0.y || draftYearNow()} ${s0.pk ? "#" + s0.pk : "round " + s0.rd}</b><small>${s0.orig !== s0.own ? "via " + esc(T(s0.orig).abbr) : "own pick"}</small></span><span class="tcard-x">×</span></button>`;
+      const col = (side, k, who) => `<div class="tcol"><div class="tcol-h">${who}</div>${side.players.map(id => pcard(id, k)).join("")}${side.picks.map(s0 => kcard(s0, k)).join("")}${!side.players.length && !side.picks.length ? `<p class="tcol-e">Add from below</p>` : ""}</div>`;
+      const addTab = UI.trAdd || "theirs";
+      const addTeam = addTab === "mine" ? u : partner, addSide = addTab === "mine" ? "give" : "get", sideObj = tr[addSide];
+      let addList = "";
+      if (addTab === "picks") addList = `<div class="eyebrow mt">Their picks</div><div class="chips wrapchips">${tradablePicks(partner.id).map(pk => `<button class="${tr.get.picks.map(pickKey).includes(pickKey(pk)) ? "on" : ""}" data-a="trpick" data-k="get" data-v="${esc(pickKey(pk))}">${esc(pickTxt(pk))}</button>`).join("") || `<span class="dim small">None</span>`}</div><div class="eyebrow mt">Your picks</div><div class="chips wrapchips">${tradablePicks(u.id).map(pk => `<button class="${tr.give.picks.map(pickKey).includes(pickKey(pk)) ? "on" : ""}" data-a="trpick" data-k="give" data-v="${esc(pickKey(pk))}">${esc(pickTxt(pk))}</button>`).join("") || `<span class="dim small">None</span>`}</div>`;
+      else { const pf = UI.trPos2 || (addTab === "theirs" && posName ? posName : "All"); const pl = addTeam.roster.map(P).filter(p => pf === "All" || p.pos === pf).sort((a, b) => b.ovr - a.ovr);
+        addList = `<div class="chips">${["All", ...POS].map(x => `<button class="${pf === x ? "on" : ""}" data-a="set" data-k="trPos2" data-v="${x}">${x}</button>`).join("")}</div><div class="mtable">${pl.map(p => { const on = sideObj.players.includes(p.id); return `<button class="mrow ${on ? "offered" : ""}" data-a="trp" data-k="${addSide}" data-v="${p.id}"><span class="m-ovr ${p.ovr >= 80 ? "hi" : p.ovr >= 70 ? "md" : ""}">${p.ovr}</span><span class="m-pos">${p.pos}</span><span class="m-name"><b>${esc(playerName(p))}</b><small>Age ${ageOf(p)}${p.wantsOut ? " · wants out" : ""}</small></span><span class="m-ask"><b>${p.con ? fmtM(p.con.apy) : "—"}</b><small>${p.con ? Math.max(0, p.con.yrs) + " yr" : ""}</small></span><span class="m-add">${on ? "✓" : "+"}</span></button>`; }).join("") || `<p class="pad dim small">Nobody here.</p>`}</div>`; }
+      builder = `<section class="mtrade"><div class="mtrade-top"><div class="mt-team" style="--c:${u.color}">${chip(u)}<b>${esc(u.abbr)}</b><small>${G.year === 2010 ? "No cap" : fmtM(capRoom(u)) + " cap"}</small></div><span class="mt-swap">⇄</span><div class="mt-team" style="--c:${partner.color}">${chip(partner)}<b>${esc(partner.abbr)}</b><small>${recStr(partner)} · needs ${Object.entries(posNeeds(partner)).sort((a, b) => b[1] - a[1]).slice(0, 2).map(x => x[0]).join(", ")}</small></div></div>
+        <div class="tcols">${col(tr.give, "give", "You send")}${col(tr.get, "get", "You receive")}</div>
+        <div class="meter"><div class="meter-h"><span>Their interest</span><b>${e ? (e.ok ? "Will accept" : ratio >= 0.85 ? "Close" : "Not interested") : "—"}</b></div><div class="meter-bar zones"><i class="${e && e.ok ? "go" : ratio >= 0.85 ? "mid" : "low"}" style="width:${fill}%"></i><span class="meter-line" style="left:80%"></span></div><p class="dim small">${e ? esc(e.ok ? "They'd take this deal." : e.why) : "Add players or picks to both sides."}</p></div>
+        <div class="row gap"><button class="btn pri grow" data-a="trgo" ${e && e.ok ? "" : "disabled"}>Propose trade</button><button class="btn" data-a="trclear">Reset</button></div>
+        <div class="small mt"><button class="link small" data-a="trposback">${posName ? esc(posName) : "Any position"}</button> · <button class="link small" data-a="trteamback">Change team</button></div></section>
+      <section class="card"><div class="seg">${[["theirs", esc(partner.abbr) + " roster"], ["mine", "Your roster"], ["picks", "Draft picks"]].map(([k, l]) => `<button class="${addTab === k ? "on" : ""}" data-a="trtab" data-v="${k}">${l}</button>`).join("")}</div>${addList}</section>`;
     }
   }
-  return `${offers.length ? `<section class="card accent"><div class="eyebrow">Offers for your players</div>${offers.map((o, i) => { const p = P(o.want); return `<div class="li"><span class="grow small"><b>${esc(T(o.tid).name)}</b> want ${p.pos} ${esc(playerName(p))}<br><span class="dim">for ${o.picks.map(pickTxt).join(", ")}</span></span><button class="btn sm pri" data-a="offeryes" data-v="${(G.offersIn || []).indexOf(o)}">Accept</button><button class="btn sm" data-a="offerno" data-v="${(G.offersIn || []).indexOf(o)}">No</button></div>`; }).join("")}</section>` : ""}${builder}`;
+  const unhappy = allIds(u).map(P).filter(p => p && (p.wantsOut || p.hold));
+  const reqs = unhappy.length ? `<section class="card accent"><div class="eyebrow">Your players' requests</div>${unhappy.map(p => `<div class="li"><span class="pos">${p.pos}</span><span class="grow">${pname(p)} <span class="dim small">${p.hold ? "holding out for a new contract" : "has asked to be traded"} · ${esc(conLine(p))}</span></span>${ovrPill(p.ovr)}<button class="btn sm" data-a="negopen" data-v="${p.id}" data-k="ext">Extend</button>${open ? `<button class="btn sm pri" data-a="trshop" data-v="${p.id}">Shop him</button>` : ""}</div>`).join("")}<p class="dim small">A new contract settles a holdout and usually calms a trade request. Unhappy players drag down the locker room until it's handled.</p></section>` : "";
+  return `${reqs}${offers.length ? `<section class="card accent"><div class="eyebrow">Trade offers for your players</div>${offers.map((o, i) => { const p = P(o.want); return `<div class="li"><span class="grow small"><b>${esc(T(o.tid).name)}</b> want ${p.pos} ${esc(playerName(p))}<br><span class="dim">for ${o.picks.map(pickTxt).join(", ")}</span></span><button class="btn sm pri" data-a="offeryes" data-v="${(G.offersIn || []).indexOf(o)}">Accept</button><button class="btn sm" data-a="offerno" data-v="${(G.offersIn || []).indexOf(o)}">No</button></div>`; }).join("")}</section>` : ""}${builder}`;
 }
 function trFindPick(tid, key) { return tradablePicks(tid).find(s => pickKey(s) === key); }
 function trProp() {
@@ -4144,6 +4319,7 @@ function prospectSheet(id) {
   const acts = Object.entries(SCOUT_ACTS).map(([k, a]) => `<button class="btn sm" data-a="sact" data-v="${id}" data-k="${k}" ${G.hours < a.h || (a.season && G.phase !== "reg") ? "disabled" : ""}>${esc(a.n)} · ${a.h}h</button>`).join("");
   const pre = G.phase === "off" && G.off && ["predraft", "draft"].includes(G.off.step) && G.dc.ev.combine && p.t === -3;
   return `<div class="eyebrow">${esc(G.dc.year)} prospect · media #${x.med}</div><h3>${esc(playerName(p))}</h3>
+  ${UI.modal.edit ? editForm(p) : ""}
   <p class="small">${p.pos} · ${esc(p.col)} · ${htStr(p.ht)}, ${p.wt} lbs · age ${ageOf(p, G.dc.year)} at the draft</p>
   ${p.t !== -3 && p.dr ? `<p class="small"><b>Drafted:</b> round ${p.dr.r}, pick ${p.dr.p} by the ${esc(T(p.dr.t).name)}</p>` : ""}
   <div class="kv"><div><span class="dim small">Rating now</span><span class="num">${v.known ? Math.round((v.lo + v.hi) / 2) : v.lo + "–" + v.hi}</span></div><div><span class="dim small">Ceiling</span><span class="num">${v.plo}–${v.phi}</span></div><div><span class="dim small">Your grade</span><span class="num small">${esc(scoutGrade(x))}</span></div></div>
@@ -4343,6 +4519,7 @@ function settingsView() {
   const th = UI.theme || lsGetJSON("nfl_theme") || "system";
   return `<section class="card"><div class="eyebrow">Difficulty</div><div class="seg wrapseg">${DIFFS.map((d, i) => `<button class="${diffLvl() === i + 1 ? "on" : ""}" data-a="diff" data-v="${i + 1}">${d}</button>`).join("")}</div><p class="dim small">Harder levels: tougher opponents on the field, foggier scouting, pickier trade partners and an owner with less patience.</p></section>
   <section class="card"><div class="eyebrow">Game day</div><div class="seg">${[["ask", "Ask before each game"], ["sim", "Always sim"]].map(([k, l]) => `<button class="${(G.skipGameday ? "sim" : "ask") === k ? "on" : ""}" data-a="gdask" data-v="${k}">${l}</button>`).join("")}</div></section>
+  <section class="card"><div class="eyebrow">Your players' development</div><div class="seg">${[["real", "Follow real careers"], ["game", "Game development"]].map(([k, l]) => `<button class="${(G.myDev || "real") === k ? "on" : ""}" data-a="mydev" data-v="${k}">${l}</button>`).join("")}</div><p class="dim small">${G.myDev === "game" ? "Players on your team grow and age with the game's development (age, potential, your coaching and camp focus). Real slumps and declines no longer apply to them." : "Players on your team follow their real careers year to year, including real slumps and declines. Your camp focus and coaching add on top."} You can also set this player by player from his card.</p></section>
   <section class="card"><div class="eyebrow">Real history</div><div class="seg">${[["on", "Use real scores"], ["off", "Sim every game"]].map(([k, l]) => `<button class="${(G.realOn !== false ? "on" : "off") === k ? "on" : ""}" data-a="realon" data-v="${k}">${l}</button>`).join("")}</div><p class="dim small">With real scores on, games you don't touch end the way they really did until your moves change those teams.</p></section>
   <section class="card"><div class="eyebrow">Theme</div><div class="seg">${[["system", "Match my phone"], ["light", "Light"], ["dark", "Dark"]].map(([k, l]) => `<button class="${th === k ? "on" : ""}" data-a="theme" data-v="${k}">${l}</button>`).join("")}</div></section>`;
 }
@@ -4594,6 +4771,15 @@ function renderModal() {
   } catch (e) { console.error(e); inner = `<p>Couldn't open this.</p>`; }
   return sheet(m.type, inner);
 }
+function editForm(p) {
+  const names = ATTR[p.pos] || [];
+  return `<section class="card editbox"><div class="eyebrow">Edit player</div>
+  <div class="offer-form"><label>First<input class="inp" id="edF" value="${esc(p.f)}"></label><label>Last<input class="inp" id="edL" value="${esc(p.l)}"></label><label>Jersey<input class="inp" id="edJ" type="number" min="0" max="99" value="${p.jer != null ? p.jer : ""}"></label></div>
+  <div class="offer-form mt"><label>Overall<input class="inp" id="edO" type="number" min="30" max="99" value="${p.ovr}"></label><label>Potential<input class="inp" id="edP" type="number" min="30" max="99" value="${p.pot}"></label><label>Morale<input class="inp" id="edM" type="number" min="5" max="100" value="${Math.round(p.mor)}"></label></div>
+  <div class="offer-form mt">${names.map((n, i) => `<label>${n}<input class="inp" id="edA${i}" type="number" min="25" max="99" value="${p.at ? p.at[i] : p.ovr}"></label>`).join("")}</div>
+  <p class="dim small mt">Change Overall to move every rating with it, or change single ratings and Overall follows their average change. Real players keep their real ups and downs in later seasons, shifted by your change.</p>
+  <div class="row gap mt"><button class="btn pri" data-a="psave" data-v="${p.id}">Save</button><button class="btn" data-a="pcancel">Cancel</button></div></section>`;
+}
 function attrGrid(p) { const names = ATTR[p.pos] || []; return `<div class="attrs">${names.map((n, i) => `<div><span class="dim small">${n}</span><span class="num">${p.at ? p.at[i] : "—"}</span></div>`).join("")}</div>`; }
 const STAT_ROWS = [["g", "G"], ["cmp", "Cmp"], ["att", "Att"], ["py", "Pass yds"], ["ptd", "Pass TD"], ["int", "INT"], ["car", "Car"], ["ry", "Rush yds"], ["rtd", "Rush TD"], ["rec", "Rec"], ["rcy", "Rec yds"], ["rctd", "Rec TD"], ["tk", "Tkl"], ["sk", "Sacks"], ["di", "INT"], ["pd", "PD"], ["fgm", "FGM"], ["fga", "FGA"], ["xpm", "XPM"], ["pun", "Punts"]];
 function statSummary(s) { const ks = STAT_ROWS.filter(([k]) => s[k]); return ks.length ? `<div class="kv3 small">${ks.slice(0, 9).map(([k, l]) => `<div><span class="dim">${l}</span><span class="num">${Math.round(s[k]).toLocaleString()}</span></div>`).join("")}</div>` : `<p class="dim small">No stats.</p>`; }
@@ -4615,7 +4801,7 @@ function playerSheet(id) {
   <div class="ph-head"><span class="avatar" style="--c:${t ? t.color : "#555"}">${esc((p.f[0] || "") + (p.l[0] || ""))}</span><h3>${esc(playerName(p))} ${injTag(p)}</h3></div>
   <p class="small">Age ${ageOf(p)} · ${htStr(p.ht)}, ${p.wt} lbs · ${esc(p.col || "—")}${p.dr ? ` · ${p.dr.y} round ${p.dr.r}, pick ${p.dr.p} (${esc(T(p.dr.t).abbr)})` : p.udfa || (real && !real[6]) ? " · undrafted" : ""}</p>
   <div class="kv"><div><span class="dim small">Overall</span><span class="num">${p.ovr}</span></div><div><span class="dim small">Potential</span><span class="num">${mine || p.ret ? p.pot : p.pot >= 85 ? "High" : p.pot >= 72 ? "Medium" : "Low"}</span></div><div><span class="dim small">Morale</span><span class="num">${Math.round(p.mor)}</span></div></div>
-  ${attrGrid(p)}
+  ${UI.modal.edit ? editForm(p) : `${attrGrid(p)}<button class="link small" data-a="pedit" data-v="${p.id}">Edit name and ratings</button>`}
   <p class="small"><b>Contract:</b> ${p.t === -1 ? `Free agent${p.ask ? `, asking ${p.ask.yrs} yrs at ${fmtM(p.ask.apy)}` : ""}` : p.t === -3 ? "Draft prospect" : esc(conLine(p)) + (p.con && p.con.gt ? `, ${fmtM(p.con.gt)} guaranteed` : "")}</p>
   <p class="small"><b>Personality:</b> ${esc(p.pers)}${p.inj > 0 ? ` · <span class="bad">${p.inj >= 99 ? "out for the season" : "out " + p.inj + " wk"}</span>` : ""}${p.sus ? ` · <span class="bad">suspended ${p.sus} wk</span>` : ""}</p>
   ${Object.keys(hon).length ? `<p class="small"><b>Honors:</b> ${Object.entries(hon).map(([k, ys]) => `${ys.length}× ${esc(k)}`).join(", ")}</p>` : ""}
@@ -4623,6 +4809,7 @@ function playerSheet(id) {
   <div class="eyebrow mt">${statY()} season</div>${statSummary(p.s || {})}
   <div class="eyebrow mt">Career</div>${statSummary(careerOf(p))}
   ${yr.length ? `<div class="card flush tbl-wrap mt"><table class="tbl stat small"><thead><tr><th>Year</th><th>Team</th><th>Line</th></tr></thead><tbody>${yr.slice(0, 20).map(([y, tm, s]) => `<tr><td class="num">${y}</td><td>${esc(tm)}</td><td>${esc(lineStr(s) || (s.fga ? `${s.fgm}/${s.fga} FG` : s.g ? s.g + " games" : "—"))}</td></tr>`).join("")}</tbody></table></div>` : ""}
+  ${p.t === G.userTeam && p.idx >= 0 ? `<div class="eyebrow mt">Development</div><div class="seg wrapseg">${[["", `Team setting (${G.myDev === "game" ? "game" : "real"})`], ["real", "Real career"], ["game", "Game development"]].map(([k, l]) => `<button class="${(p.ownDev || "") === k ? "on" : ""}" data-a="pdev" data-v="${p.id}" data-k="${k}">${l}</button>`).join("")}</div><p class="dim small">${gameDev(p) ? "He grows and ages with the game's development, not his real career." : "He follows his real career year to year."}</p>` : ""}
   ${gm && G.phase !== "post" ? `<div class="eyebrow mt">Moves</div><div class="row gap wrap">
     ${p.lst === "a" ? `<button class="btn sm" data-a="negopen" data-v="${p.id}" data-k="ext">Extend</button><button class="btn sm" data-a="tops" data-v="${p.id}">To practice squad</button>${p.out || p.inj >= 4 ? `<button class="btn sm" data-a="toir" data-v="${p.id}">Put on IR</button>` : ""}` : ""}
     ${p.lst === "p" ? `<button class="btn sm" data-a="promote" data-v="${p.id}">Promote to 53</button>` : ""}
@@ -4631,7 +4818,7 @@ function playerSheet(id) {
     ${nk ? `<button class="btn sm bad" data-a="release" data-v="${p.id}">Yes, release him</button><button class="btn sm" data-a="cutno">Keep</button>` : `<button class="btn sm" data-a="cutask" data-v="${p.id}">Release</button>`}</div>
     ${p.con && p.con.gt && nk ? `<p class="dim small">Guaranteed money still counts against your cap this year.</p>` : ""}` : ""}
   ${isGM() && p.t === -1 && !p.ret ? `<div class="eyebrow mt">${faWaveOpen() ? "Free agent offer · decided when the wave ends" : "Sign him"}</div><p class="small">He wants ${(a => `${a.yrs} yr${a.yrs > 1 ? "s" : ""}, ${fmtM(a.apy)} a year, ${fmtM(a.gt)} guaranteed`)(faWaveOpen() ? (p.ask || askFor(p, G.year)) : faNowAsk(p))}.</p>${negForm(p, faWaveOpen() ? "fa" : "now")}` : ""}
-  ${real && !p.dv && G.year <= LAST_REAL ? `<p class="dim small mt">Following his real career.</p>` : real ? `<p class="dim small mt">His career has gone its own way.</p>` : ""}`;
+  ${p.t === G.userTeam && real ? "" : real && !p.dv && G.year <= LAST_REAL ? `<p class="dim small mt">Following his real career.</p>` : real ? `<p class="dim small mt">His career has gone its own way.</p>` : ""}`;
 }
 function teamSheet(id) {
   const t = T(id); const pos = UI.tvPos || "All";
@@ -4674,14 +4861,19 @@ function simToSheet() {
   return `<div class="eyebrow">Sim ahead</div><h3>Where to?</h3><div class="stack">${opts.map(([k, l]) => `<button class="btn" data-a="simgo" data-v="${k}">${l}</button>`).join("")}</div>
   <p class="dim small mt">Your games are simmed with your game plan. ${isGM() ? "Contracts, free agency and your picks are handled by your staff the way you would: best players re-signed, needs filled, your board followed." : ""} It stops if something needs you, like getting fired or a holdout.</p>`;
 }
+function mdnCard(p) {
+  const t = p.t >= 0 ? T(p.t) : null; const names = ATTR[p.pos] || []; const top = names.map((n, i) => [n, p.at ? p.at[i] : p.ovr]).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  return `<div class="mcard" style="--c:${t ? t.color : "#2a3b5f"}"><div class="mcard-ovr"><b>${p.ovr}</b><span>OVR</span></div><div class="mcard-main"><div class="mcard-pos">${p.pos}${p.jer != null ? " · #" + p.jer : ""}${t ? " · " + esc(t.abbr) : p.t === -1 ? " · Free agent" : ""}</div><div class="mcard-name">${esc(playerName(p))}</div><div class="mcard-sub">Age ${ageOf(p)} · ${htStr(p.ht)}, ${p.wt} · ${esc(p.col || "")}</div><div class="mcard-at">${top.map(([n, v]) => `<span>${n} <b>${v}</b></span>`).join("")}</div></div></div>`;
+}
 function negSheet(m) {
   const p = P(m.id); if (!p) return "";
   const kind = m.k || "re";
   const a = kind === "now" ? (p.counter || faNowAsk(p)) : (p.counter || p.ask || (p.ask = askFor(p, G.year, kind !== "fa")));
-  return `<div class="eyebrow">${kind === "ext" ? "Extension" : kind === "fa" ? "Free agent offer · decided when the wave ends" : kind === "now" ? "Free agent · signs on the spot" : "Re-sign"} · ${p.pos}</div><h3>${esc(playerName(p))}</h3>
-  <p class="small">Age ${ageOf(p)} · ${ovrPill(p.ovr)} · ${p.t === -1 ? "Free agent" : esc(conLine(p))}</p>
-  <p class="small">His agent wants <b>${a.yrs} years, ${fmtM(a.apy)} a year, ${fmtM(a.gt)} guaranteed</b>.${p.tries ? ` Offers so far: ${p.tries} of 3.` : ""}</p>
-  <p class="small">Cap room: ${G.year === 2010 ? "uncapped year" : fmtM(capRoom(userT()))}</p>
+  const int = p.t === -1 ? faInterest(p) : null;
+  return `<div class="eyebrow">${kind === "ext" ? "Contract extension" : kind === "fa" ? "Free agency · decided when the wave ends" : kind === "now" ? "Free agent · signs on the spot" : "Re-sign"}</div>
+  ${mdnCard(p)}
+  <div class="mstats"><div><span>Asking</span><b>${fmtM(a.apy)}</b><small>${a.yrs} yr${a.yrs > 1 ? "s" : ""} · ${fmtM(a.gt)} gtd</small></div><div><span>Cap space</span><b class="${capRoom(userT()) < 0 && G.year !== 2010 ? "bad" : ""}">${G.year === 2010 ? "None" : fmtM(capRoom(userT()))}</b><small>${G.year === 2010 ? "uncapped year" : "this season"}</small></div>${int != null ? `<div><span>Interest</span><b>${int}</b><small>${int >= 70 ? "wants to come" : int >= 45 ? "open to it" : "lukewarm"}</small></div>` : `<div><span>Morale</span><b>${Math.round(p.mor)}</b><small>${esc(p.pers)}</small></div>`}</div>
+  ${p.counter ? `<p class="small warn">Counter on the table: ${p.counter.yrs} yrs, ${fmtM(p.counter.apy)} a year, ${fmtM(p.counter.gt)} guaranteed.</p>` : ""}${p.tries ? `<p class="dim small">Offers so far: ${p.tries} of 3. A third miss ends talks.</p>` : ""}
   ${negForm(p, kind)}`;
 }
 function draftTradeSheet() {
@@ -4851,6 +5043,7 @@ function renderNewGame() {
     <div class="seg wrapseg">${[["HC", "Head coach"], ["oc", "Off. coordinator"], ["dc", "Def. coordinator"], ["pos", "Position coach"]].map(([k, l]) => `<button class="${(k === "pos" ? Object.keys(POSC).includes(ng.role || "") : (ng.role || "HC") === k) ? "on" : ""}" data-a="ngrole" data-v="${k === "pos" ? "qbc" : k}">${l}</button>`).join("")}</div>
     ${Object.keys(POSC).includes(ng.role || "") ? `<div class="chips mt">${Object.keys(POSC).map(k => `<button class="${ng.role === k ? "on" : ""}" data-a="ngrole" data-v="${k}">${esc(POSC_N[k])}</button>`).join("")}</div>` : ""}
     ${(ng.role || "HC") === "HC" ? `<div class="eyebrow mt">Job title</div><div class="seg">${[["1", "Head coach & GM"], ["0", "Head coach only"]].map(([k, l]) => `<button class="${(ng.gm !== false ? "1" : "0") === k ? "on" : ""}" data-a="nggm" data-v="${k}">${l}</button>`).join("")}</div><p class="dim small">${ng.gm !== false ? "You run the roster too: contracts, free agency, trades and the draft." : "You coach. The GM handles the roster and drafts, with your board as advice."}</p>` : `<p class="dim small">${["oc", "dc"].includes(ng.role) ? "Call one side of the ball under the team's real head coach. Win and head coaching offers come." : "Coach one position group and climb: coordinator, then head coach."}</p>`}
+    <div class="eyebrow mt">Your players</div><div class="seg">${[["real", "Follow real careers"], ["game", "Game development"]].map(([k, l]) => `<button class="${(ng.dev || "real") === k ? "on" : ""}" data-a="ngdev" data-v="${k}">${l}</button>`).join("")}</div><p class="dim small">${(ng.dev || "real") === "game" ? "Players on your team grow with your coaching instead of following their real slumps and declines." : "Players on your team follow their real careers. You can change this any time."}</p>
     <div class="eyebrow mt">Coaching background</div>
     <div class="stack">${Object.keys(ARCH).map(a => `<button class="card pickc ${ng.arch === a ? "on" : ""}" data-a="ngarch" data-v="${a}"><div class="b">${a}</div><div class="dim small">${ARCH_D[a]}</div></button>`).join("")}</div>
     <div class="eyebrow mt">Difficulty</div><div class="seg wrapseg">${DIFFS.map((d, i) => `<button class="${(ng.diff || 3) === i + 1 ? "on" : ""}" data-a="ngdiff" data-v="${i + 1}">${d}</button>`).join("")}</div>
@@ -4870,7 +5063,7 @@ function readOffer() { const y = +document.getElementById("ofY").value, apy = +d
 document.addEventListener("click", e => {
   const el = e.target.closest("[data-a]"); if (!el || el.disabled) return;
   const a = el.dataset.a, v = el.dataset.v, k = el.dataset.k;
-  if (!G && !["load", "newgame", "ngback", "ngarch", "ngrole", "ngnext", "ngdiff", "ngteam", "ngstart", "nggm"].includes(a)) return;
+  if (!G && !["load", "newgame", "ngback", "ngarch", "ngrole", "ngnext", "ngdiff", "ngteam", "ngstart", "nggm", "ngdev"].includes(a)) return;
   switch (a) {
     // navigation
     case "tab": UI.tab = v; UI.modal = null; if (v === "more") UI.more = null; render(); window.scrollTo(0, 0); return;
@@ -4933,6 +5126,20 @@ document.addEventListener("click", e => {
     case "statc": UI.statC = v; UI.keepScroll = true; render(); return;
     case "statcat": UI.statCat = v; UI.statSort = null; UI.keepScroll = true; render(); return;
     case "statsort": UI.statSort = v; UI.keepScroll = true; render(); return;
+    case "pedit": UI.modal.edit = true; UI.keepScroll = true; render(); return;
+    case "pcancel": UI.modal.edit = false; UI.keepScroll = true; render(); return;
+    case "psave": { const p = P(+v); if (!p) return; const g = id => document.getElementById(id); const num2 = (id, lo, hi, d) => { const x = parseInt(g(id) && g(id).value, 10); return isNaN(x) ? d : clamp(x, lo, hi); };
+      const f = g("edF").value.trim(), l = g("edL").value.trim(); if (f) p.f = f; if (l) p.l = l;
+      const j = g("edJ").value.trim(); p.jer = j === "" ? null : clamp(parseInt(j, 10) || 0, 0, 99);
+      const b = ATTR_BIAS[p.pos], n = (ATTR[p.pos] || []).length, oldO = p.ovr, oldAt = (p.at || []).slice();
+      let newO = num2("edO", 30, 99, p.ovr); const at = []; for (let i = 0; i < n; i++) at.push(num2("edA" + i, 25, 99, oldAt[i]));
+      if (newO === oldO) { const d = at.reduce((a, x, i) => a + (x - oldAt[i]), 0) / Math.max(1, n); newO = clamp(Math.round(oldO + d), 30, 99); }
+      if (newO !== oldO) { p.nudge = (p.nudge || 0) + (newO - oldO); p.ovr = newO; }
+      const attrsTouched = at.some((x, i) => x !== oldAt[i]);
+      if (attrsTouched) p.atOff = at.map((x, i) => x - p.ovr - b[i]); 
+      calcAttrs(p);
+      p.pot = Math.max(p.ovr, num2("edP", 30, 99, p.pot)); p.mor = num2("edM", 5, 100, p.mor);
+      UI.modal.edit = false; for (const k in LIVE_R) delete LIVE_R[k]; UI.keepScroll = true; render(); toast("Player saved."); saveSoon(); return; }
     case "cutask": UI.modal.cut = true; UI.keepScroll = true; render(); return;
     case "cutno": UI.modal.cut = false; UI.keepScroll = true; render(); return;
     case "release": { const p = P(+v); const e2 = releasePlayer(+v); if (e2) return toast(e2); UI.modal = null; act(() => null); toast(`${playerName(p)} released.`); return; }
@@ -4951,9 +5158,10 @@ document.addEventListener("click", e => {
     case "trp": { const tr = trState(); const side = tr[k]; const id = +v; side.players = side.players.includes(id) ? side.players.filter(x => x !== id) : [...side.players, id]; UI.keepScroll = true; render(); return; }
     case "trpick": { const tr = trState(); const side = tr[k]; const tid = k === "give" ? G.userTeam : tr.tid; const s = trFindPick(tid, v); if (!s) return; const has = side.picks.some(x => pickKey(x) === v); side.picks = has ? side.picks.filter(x => pickKey(x) !== v) : [...side.picks, s]; UI.keepScroll = true; render(); return; }
     case "trclear": UI.tr = null; UI.keepScroll = true; render(); return;
+    case "trtab": UI.trAdd = v; UI.trPos2 = null; UI.keepScroll = true; render(); return;
     case "trpos": { const tr = trState(); tr.pos = v; tr.tid = null; tr.get = { players: [], picks: [] }; UI.trAll = 0; render(); return; }
     case "trposback": { const tr = trState(); tr.pos = null; tr.tid = null; tr.get = { players: [], picks: [] }; render(); return; }
-    case "trteamv": { const tr = trState(); tr.tid = +v; tr.get = { players: [], picks: [] }; UI.trAll = 0; render(); window.scrollTo(0, 0); return; }
+    case "trteamv": { const tr = trState(); tr.tid = +v; tr.get = { players: [], picks: [] }; UI.trAll = 0; UI.trAdd = "theirs"; UI.trPos2 = null; render(); window.scrollTo(0, 0); return; }
     case "trteamback": { const tr = trState(); tr.tid = null; tr.get = { players: [], picks: [] }; render(); return; }
     case "trgo": { const prop = trProp(); const e2 = doTrade(prop); if (e2) return toast(e2); UI.tr = null; act(() => null); toast("Trade done."); return; }
     case "trwith": UI.tr = null; trState().tid = +v; trState().pos = "ANY"; UI.modal = null; UI.tab = "team"; UI.teamSub = "trades"; render(); window.scrollTo(0, 0); return;
@@ -5004,6 +5212,8 @@ document.addEventListener("click", e => {
     case "mygoal": act(() => toggleMyGoal(v, k ? +k : null)); return;
     // settings
     case "diff": G.diff = +v; act(() => null); return;
+    case "mydev": G.myDev = v; act(() => null); toast(v === "game" ? "Your players now develop in-game." : "Your players follow their real careers."); return;
+    case "pdev": { const p = P(+v); if (p) p.ownDev = k || undefined; act(() => null); return; }
     case "realon": G.realOn = v === "on"; act(() => null); return;
     case "theme": lsSetJSON("nfl_theme", v); applyTheme(); UI.keepScroll = true; render(); return;
     case "saveNow": saveGame(); toast("Saving…"); return;
@@ -5019,14 +5229,15 @@ document.addEventListener("click", e => {
     case "ngarch": UI.ng.arch = v; UI.keepScroll = true; render(); return;
     case "ngrole": UI.ng.role = v; UI.keepScroll = true; render(); return;
     case "nggm": UI.ng.gm = v === "1"; UI.keepScroll = true; render(); return;
+    case "ngdev": UI.ng.dev = v; UI.keepScroll = true; render(); return;
     case "ngdiff": UI.ng.diff = +v; UI.keepScroll = true; render(); return;
     case "ngnext": UI.ng.step = 2; render(); window.scrollTo(0, 0); return;
     case "ngteam": UI.ng.team = +v; UI.keepScroll = true; render(); return;
     case "ngstart": { const ng = UI.ng; $app.innerHTML = `<div class="start"><div class="hero"><div class="eyebrow">Building the ${ng.year} season</div><h1>Setting up 32 teams…</h1></div></div>`;
-      setTimeout(() => { try { newGame({ team: ng.team, coachName: ng.name.trim(), arch: ng.arch, role: ng.role || "HC", gm: (ng.role || "HC") === "HC" && ng.gm !== false, year: ng.year, diff: ng.diff }); G.gmPref = ng.gm !== false; UI.ng = null; UI.tab = "home"; UI.modal = null; render(); window.scrollTo(0, 0); saveGame(); } catch (x) { console.error(x); UI.ng = null; G = null; render(); toast("Couldn't start that season."); } }, 30); return; }
+      setTimeout(() => { try { newGame({ team: ng.team, coachName: ng.name.trim(), arch: ng.arch, role: ng.role || "HC", gm: (ng.role || "HC") === "HC" && ng.gm !== false, year: ng.year, diff: ng.diff }); G.gmPref = ng.gm !== false; G.myDev = ng.dev || "real"; UI.ng = null; UI.tab = "home"; UI.modal = null; render(); window.scrollTo(0, 0); saveGame(); } catch (x) { console.error(x); UI.ng = null; G = null; render(); toast("Couldn't start that season."); } }, 30); return; }
   }
 });
-document.addEventListener("input", e => { const el = e.target; if (el.dataset.ch === "ngname") { UI.ng.name = el.value; const b = document.querySelector('[data-a="ngnext"]'); if (b) b.disabled = !el.value.trim(); } });
+document.addEventListener("input", e => { const el = e.target; if (el.dataset.ch === "offr") { updOfferUI(); return; } if (el.dataset.ch === "ngname") { UI.ng.name = el.value; const b = document.querySelector('[data-a="ngnext"]'); if (b) b.disabled = !el.value.trim(); } });
 document.addEventListener("change", e => {
   const el = e.target, k = el.dataset.ch; if (!k) return;
   switch (k) {
