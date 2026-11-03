@@ -17,5 +17,5 @@ Week-by-week rosters, every draft from 2009 to 2026 plus undrafted signings, con
 - Washington shows a plain badge for 2009 to 2021; other teams use their current logo in older seasons.
 - Some older weekly rosters are incomplete; teams are topped up to 53 with real free agents first.
 - Combine numbers are estimated where a prospect has no recorded result.
-- Draft classes after 2027 come from real high-school recruiting classes, then from generated players.
+- The 2027 class starts from the NFL Draft Countdown top 150 (Oct 31, 2026) and the 2028 class from early 2028 rankings; the rest of those classes and the 2029 and 2030 classes come from the real high-school recruiting classes, then generated players. Prospect ratings are projections, not real results.
 - Career totals before 1999 are approximate.
